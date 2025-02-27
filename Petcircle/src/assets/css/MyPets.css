@@ -1,0 +1,105 @@
+.addpet-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px; /* Dark background */
+    height: 100vh;
+}
+.addpet-header {
+    text-align: center;
+}
+
+.addpet-logo {
+    max-width: 180px;
+}
+
+.addpet-header h1 {
+    color: #1a1a2e; /* Light color for header */
+    font-size: 40px;
+}
+
+.addpet-form {
+    background-color: #1a1a2e; /* White background for form */
+    border-radius: 12px;
+    padding: 25px;
+    width: 100%;
+    max-width: 600px; /* Adjusted max-width for better centering */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+}
+
+.form-columns {
+    display: flex;
+    flex-direction: column; /* Stack columns vertically */
+    gap: 20px; /* Reduced gap for better spacing */
+}
+
+.form-column {
+    flex: 1;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #f3ecec; /* Dark color for labels */
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #f3ecec; /* Light border */
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+    font-size: 16px; /* Increased font size for better readability */
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #1a1a2e; /* Dark border on focus */
+    outline: none; /* Remove default outline */
+}
+
+.new-group{
+    display: block;
+    font-weight: 600;
+    color: #f3ecec; 
+
+}
+.radio-group {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.radio-group label {
+    display: flex;
+    gap: 10px;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 10px;
+    background-color:#f3ecec;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+    font-size: 16px; /* Increased font size for button */
+}
+
+.submit-btn:hover {
+    background-color: #9e9eb4; /* Darker shade on hover */
+}
+
+.error-message {
+    color: red; /* Error message color */
+    font-size: 14px; /* Font size for error messages */
+}

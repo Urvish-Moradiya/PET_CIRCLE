@@ -1,0 +1,119 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #1a1a2e;
+  padding: 20px;
+  box-sizing: border-box; /* Ensures padding does not overflow the viewport */
+}
+
+.register-card {
+  display: flex;
+  flex-direction: row;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  width: 100%;
+  height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.logo-section {
+  flex: 1;
+  background-image: url('../image/bg2.jpg'); /* Adjust the background image path */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.logo {
+  max-width: 250px;
+  margin-bottom: 20px;
+}
+
+.text-container {
+  margin-bottom: 40px;
+}
+
+.register-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.register-subtitle {
+  font-size: 16px;
+  margin: 0;
+}
+
+.register-form {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #1a1a2e;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #1a1a2e;
+  outline: none;
+}
+
+.register-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  background-color: #1a1a2e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.register-button:hover {
+  background-color: #1e1e37bb;
+}
+
+.login-footer {
+  margin-top: 20px;    
+  text-align: center;
+  color: #101010;
+}
+
+.login-footer a {
+  color: #1a1a2e;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.login-footer a:hover {
+  color: #1a1a2e;
+}

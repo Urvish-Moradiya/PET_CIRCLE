@@ -1,0 +1,31 @@
+.home-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f5f6fa;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .home-container h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .home-container p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  .home-container blockquote {
+    font-size: 1rem;
+    color: #888;
+    font-style: italic;
+    border-left: 4px solid #4a90e2;
+    padding-left: 10px;
+    margin: 20px 0;
+  }
