@@ -1,5 +1,5 @@
 // App.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "tailwindcss"
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
@@ -13,33 +13,21 @@ import  Messages  from './components/Pages/Messages';
 import  Settings  from './components/Pages/Settings';
 import Registration from './components/Registration';
 
+import axios from "axios";
+
 function App() {
-  const [user, setUser] = useState(null);
-
-  const handleLogin = (email, password) => {
-    if (email === 'admin@example.com' && password === '112233') {
-      setUser({ email, role: 'admin' });
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-  };
-
+  axios.defaults.baseURL = "http://localhost:5000"
   return (
       <Routes>
         {/* Routes without sidebar */}
-        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="/login" element={<Login/>} />
         <Route path="/register" element={<Registration />} />
 
         {/* Routes with sidebar */}
         <Route
           path="/*"
           element={
-            <MainLayout user={user} onLogout={handleLogout}>
+            <MainLayout>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/my-pet" element={<MyPets />} />

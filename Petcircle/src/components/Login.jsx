@@ -1,29 +1,72 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import '../assets/css/Loginpage.css';
-import {Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-const Login = ({ onLogin }) => {
+export const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const submitHandler = (data) => {
-    const isLoggedIn = onLogin(data.email, data.password);
-    if (isLoggedIn) {
-      alert("Login Successful");
-      window.location.replace("/");
-    } else {
-      alert("Invalid credentials");
+  const submitHandler = async (data) => {
+    setLoading(true);
+    setErrorMessage("");
+
+    try {
+      console.log("Sending login request with data:", data);
+
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      console.log("Parsed response JSON:", result);
+
+      if (response.ok) {
+        alert("Login successful");
+
+        localStorage.setItem('role', result.data.role);  // Store the user role in localStorage
+        navigate("/dashboard");
+      } else {
+        setErrorMessage(result.message || "Invalid credentials");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrorMessage("Something went wrong, please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const validationmethod = {
     emailValidator: {
-      required: { value: true, message: "Email is required" },
+      required: {
+        value: true,
+        message: "Email is required",
+      },
+      pattern: {
+        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+        message: "Enter a valid email address",
+      },
     },
     passwordValidator: {
-      required: { value: true, message: "Password is required" },
+      required: {
+        value: true,
+        message: "Password is required",
+      },
+      minLength: {
+        value: 6,
+        message: "Password must be at least 6 characters long",
+      },
     },
   };
+
   return (
     <div className="login-container">
       <div className="login-card">
@@ -45,7 +88,9 @@ const Login = ({ onLogin }) => {
             <input type="password" {...register("password", validationmethod.passwordValidator)} placeholder="Enter your password" />
             <span style={{ color: "red" }}>{errors.password?.message}</span>
           </div>
-          <button type="submit" className="login-button">Log In</button>
+          <button type="submit" className="login-button" disabled={loading}>
+            {loading ? 'Logging in...' : 'Log In'}
+          </button>
           <div className="social-login">
             <button type="button" className="google-login">Sign in with Google</button>
           </div>
@@ -53,6 +98,7 @@ const Login = ({ onLogin }) => {
             <p><b>New to PetCircle? </b><Link to="/register">Create Account</Link></p>
             <p><a href="/forgot-password">Forgot Password?</a></p>
           </div>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
         </form>
       </div>
     </div>

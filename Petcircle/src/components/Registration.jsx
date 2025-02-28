@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import '../assets/css/Registration.css'; // Adjust the path as necessary
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Registration = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit } = useForm();
+  const navigate = useNavigate()
 
-  const submitHandler = (data) => {
-    // Handle registration logic here
-    console.log('Registration Data:', data);
-    alert("Registration Successful");
-    window.location.replace("/login"); // Redirect to login page after successful registration
+  const submitHandler = async(data) => {
+    const res = await axios.post("/user",data)
+    navigate("/login");
+   
   };
 
   const validationMethod = {
@@ -42,17 +43,14 @@ const Registration = () => {
           <div className="input-group">
             <label>Full Name</label>
             <input type="text" {...register("fullName", validationMethod.nameValidator)} placeholder="Enter your name" />
-            <span style={{ color: "red" }}>{errors.ownerName?.message}</span>
-          </div>
+            </div>
           <div className="input-group">
             <label>Email Address</label>
             <input type="email" {...register("email", validationMethod.emailValidator)} placeholder="Enter your email" />
-            <span style={{ color: "red" }}>{errors.email?.message}</span>
           </div>
           <div className="input-group">
             <label>Phone Number</label>
             <input type="tel" {...register("phone", validationMethod.phoneValidator)} placeholder="Enter your phone number" />
-            <span style={{ color: "red" }}>{errors.phone?.message}</span>
           </div>
           <div className="input-group">
             <label>Role</label>
@@ -61,12 +59,10 @@ const Registration = () => {
               <option value="petOwner">Pet Owner</option>
               <option value="petExpert">Pet Expert</option>
             </select>
-            <span style={{ color: "red" }}>{errors.role?.message}</span>
           </div>
           <div className="input-group">
             <label>Password</label>
             <input type="password" {...register("password", validationMethod.passwordValidator)} placeholder="Enter your password" />
-            <span style={{ color: "red" }}>{errors.password?.message}</span>
           </div>
           <button type="submit" className="register-button">Register</button>
           <div className="login-footer">

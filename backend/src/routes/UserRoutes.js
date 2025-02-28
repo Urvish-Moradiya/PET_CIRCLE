@@ -1,8 +1,13 @@
-const routes = require("express").Router()
-const userController = require("../controllers/UserController")
-routes.get("/users",userController.getAllUser)
-routes.post("/user",userController.addUser)
-routes.delete("/user/:id",userController.deleteUser)
-routes.get("/user/:id",userController.getUserById)
+const routes = require("express").Router();
+const userController = require("../controllers/UserController");
 
-module.exports = routes
+// Changes: Added "/api" prefix to login and signup routes
+routes.post("/api/signup", userController.signup); // Signup route
+routes.post("/api/login", userController.loginUser); // Login route
+
+routes.post("/user", userController.signup);
+routes.get("/users", userController.getAllUsers);
+routes.get("/user/:id", userController.getUserById);
+routes.delete("/user/:id", userController.deleteUserById);
+
+module.exports = routes;

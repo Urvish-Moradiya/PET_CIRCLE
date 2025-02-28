@@ -1,10 +1,10 @@
 import React from 'react';
 import { Sidebar } from './Sidebar';
 
-const MainLayout = ({ user, onLogout, children }) => {
+const MainLayout = ({children }) => {
   return (
     <div className="app-container">
-      <Sidebar userRole={user?.role} onLogout={onLogout}>
+      <Sidebar>
         {children}
       </Sidebar>
     </div>

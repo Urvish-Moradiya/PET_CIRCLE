@@ -1,23 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import '../assets/css/Sidebar.css';
-import logo from '../assets/image/newlogo.png';
+import '../assets/css/Sidebar.css'; // Make sure to have your CSS
+import logo from '../assets/image/newlogo.png'; // Replace with the correct path to your logo
 
-export const Sidebar = ({ userRole, onLogout, children }) => {
+export const Sidebar = ({ onLogout, children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userRole, setUserRole] = useState(null); // To store the role
   const navigate = useNavigate();
+
+  // Fetch role from localStorage on component mount
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    setUserRole(role);
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleLogin = () => {
-    navigate('/login'); // Redirect to login page
+  const handleLogout = () => {
+    localStorage.removeItem('role'); // Clear the role from localStorage
+    setUserRole(null); // Update state
+    onLogout(); // Call the onLogout passed as prop
+    navigate('/login'); // Redirect to login
   };
 
-  const handleLogout = () => {
-    onLogout(); // Log out the user
-    navigate('/'); // Redirect to home page after logout
+  const handleLogin = () => {
+    navigate('/login'); // Navigate to login page
   };
 
   return (
@@ -74,7 +83,7 @@ export const Sidebar = ({ userRole, onLogout, children }) => {
             </Link>
             <span className="tooltip">Messages</span>
           </li>
-          {userRole === 'expert' && (
+          {userRole === 'petExpert' && (
             <>
               <li>
                 <Link to="/expert/sessions">
@@ -99,7 +108,7 @@ export const Sidebar = ({ userRole, onLogout, children }) => {
               </li>
             </>
           )}
-          {userRole === 'admin' && (
+          {userRole === 'Admin' && (
             <>
               <li>
                 <Link to="/admin/dashboard">
@@ -130,10 +139,8 @@ export const Sidebar = ({ userRole, onLogout, children }) => {
               <div className="name_job">
                 <div className="name">User Name</div>
                 <div className="job">
-                  {userRole === 'admin'
-                    ? 'Administrator'
-                    : userRole === 'expert'
-                    ? 'Pet Expert'
+                  {userRole === 'Admin' ? 'Administrator'
+                    : userRole === 'petExpert' ? 'Pet Expert'
                     : 'Pet Owner'}
                 </div>
               </div>
