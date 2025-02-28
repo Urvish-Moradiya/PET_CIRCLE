@@ -1,20 +1,21 @@
 const express = require("express") //express....
 const mongoose = require("mongoose")
 //express object..
+const cors = require('cors');
+const authRoutes = require('./src/routes/UserRoutes');
 const app = express()
+
 app.use(express.json())//for accept data in json format
+app.use(cors());
 
-
-const userRoutes = require("./src/routes/UserRoutes")
-app.use(userRoutes)
-
-
-mongoose.connect("mongodb://127.0.0.1:27017/UserData").then(()=>{
-    console.log("database connected....")
-})
-
-//server creation...
-const PORT = 3000
-app.listen(PORT,()=>{
-    console.log("server started on port number ",PORT)
-})
+mongoose.connect('mongodb://localhost:27017/petcircle', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }).then(() => console.log('MongoDB connected'))
+    .catch(err => console.log(err));
+  
+  // Routes
+  app.use('/api/auth', authRoutes);
+  
+  const port = process.env.PORT || 5000;
+  app.listen(port, () => console.log(`Server running on port ${port}`));
