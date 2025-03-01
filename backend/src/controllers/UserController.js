@@ -27,27 +27,48 @@ const loginUser = async (req, res) => {
 };
 
 
-// Signup Function
+
 const signup = async (req, res) => {
   try {
-    const { password, ...rest } = req.body;
-   
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(password, salt);
+    const { email, phone, password, ...rest } = req.body; 
+    //1. check karna ki ye email,number register he ya nhi
+    const existingUser = await userModel.findOne({
+      $or: [{ email: email }, { phone: phone }]
+    });
+
+    if (existingUser) {
+      // 2. If user exists, return an error response
+      return res.status(400).json({
+        message: "User already exists",
+      });
+    }
+
+    // 3. Hash the password using bcrypt
+    const salt = bcrypt.genSaltSync(10); // Generate a salt with 10 rounds (makes the password harder to crack)
+    const hashedPassword = bcrypt.hashSync(password, salt); // Hash the password
+
+    // 4. Create a new user object with the hashed password
     const newUser = {
-      ...rest,
-      password: hashedPassword,
+      ...rest, // Include any additional fields from the request (name, etc.)
+      email,   // Ensure email is passed to the new user object
+      phone,   // Ensure phone is passed to the new user object
+      password: hashedPassword, // Store the hashed password
     };
+
+    // 5. Save the new user to the database
     const createdUser = await userModel.create(newUser);
-    
+
+    // 6. Send a success response with the newly created user data
     res.status(201).json({
       message: "User created successfully",
       data: createdUser,
     });
+
   } catch (err) {
+    // 7. If an error occurs, return an error response
     res.status(500).json({
-      message: "Error creating user",
-      error: err,
+      message: "server error",
+      error: err.message,
     });
   }
 };

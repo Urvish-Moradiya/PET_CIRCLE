@@ -73,11 +73,12 @@
 
 .input-group input,
 .input-group select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #1a1a2e;
-  border-radius: 8px;
-  transition: border-color 0.3s ease;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #1a1a2e;
+    border-radius: 10px;
+    transition: border-color 0.3s ease;
+
 }
 
 .input-group input:focus,

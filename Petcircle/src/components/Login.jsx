@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form';
 import '../assets/css/Loginpage.css';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -29,16 +31,35 @@ export const Login = () => {
       console.log("Parsed response JSON:", result);
 
       if (response.ok) {
-        alert("Login successful");
+        // Use Toastify for a success message
+        toast.success('Login successful!', {
+          position: "top-right",
+          autoClose: 2000, // auto close after 3 seconds
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
 
-        localStorage.setItem('role', result.data.role);  // Store the user role in localStorage
-        navigate("/dashboard");
+        localStorage.setItem('role', result.data.role);
+        
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
       } else {
-        setErrorMessage(result.message || "Invalid credentials");
+        toast.error(result.message || "Invalid credentials", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true
+        });
       }
     } catch (error) {
       console.error("Login error:", error);
-      setErrorMessage("Something went wrong, please try again later.");
+      toast.error("Something went wrong.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true
+      });
     } finally {
       setLoading(false);
     }
@@ -61,14 +82,15 @@ export const Login = () => {
         message: "Password is required",
       },
       minLength: {
-        value: 6,
-        message: "Password must be at least 6 characters long",
+        value: 8,
+        message: "Password must be at least 8 characters long",
       },
     },
   };
 
   return (
     <div className="login-container">
+      <ToastContainer /> 
       <div className="login-card">
         <div className="logo-section">
           <img src="/src/assets/image/newlogo.png" alt="PetCircle Logo" className="logo" />
@@ -91,12 +113,9 @@ export const Login = () => {
           <button type="submit" className="login-button" disabled={loading}>
             {loading ? 'Logging in...' : 'Log In'}
           </button>
-          <div className="social-login">
-            <button type="button" className="google-login">Sign in with Google</button>
-          </div>
           <div className="login-footer">
             <p><b>New to PetCircle? </b><Link to="/register">Create Account</Link></p>
-            <p><a href="/forgot-password">Forgot Password?</a></p>
+            <p><a href="/forgotpassword">Forgot Password?</a></p>
           </div>
           {errorMessage && <p className="error-message">{errorMessage}</p>}
         </form>

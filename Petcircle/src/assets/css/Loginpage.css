@@ -74,9 +74,9 @@
   
   .input-group input {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #1a1a2e;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: border-color 0.3s ease;
   }
   
@@ -101,28 +101,7 @@
     background-color: #1e1e37bb;
   }
   
-  .social-login {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-  }
-  
-  .google-login {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    background-color: #f1f1f1;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .google-login:hover {
-    background-color: #e0e0e0;
-  }
-  
+
   .login-footer {
     margin-top: 20px;    
     text-align: center;

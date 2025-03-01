@@ -14,6 +14,7 @@ import  Settings  from './components/Pages/Settings';
 import Registration from './components/Registration';
 
 import axios from "axios";
+import ForgotPassword from './components/ForgotPassword';
 
 function App() {
   axios.defaults.baseURL = "http://localhost:5000"
@@ -22,6 +23,7 @@ function App() {
         {/* Routes without sidebar */}
         <Route path="/login" element={<Login/>} />
         <Route path="/register" element={<Registration />} />
+        <Route path='/forgotpassword' element={<ForgotPassword/>}/>
 
         {/* Routes with sidebar */}
         <Route
