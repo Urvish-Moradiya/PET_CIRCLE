@@ -1,6 +1,9 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
 import '../../assets/css/MyPets.css'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Logo from '../../assets/image/newlogo.png'; 
 
 const MyPets = () => {
@@ -28,17 +31,32 @@ const MyPets = () => {
 
   const selectedAnimalType = watch('animalType');
 
-  const onSubmit = (data) => {
-    console.log('Pet Registration Data:', {
-      petDetails: {
-        type: data.animalType,
-        breed: data.breed,
-        name: data.petName,
-        age: data.petAge,
-        weight: data.petWeight,
-        gender: data.petGender
+  const onSubmit = async(data) => {
+    try {
+      const res = await axios.post("/pet", data);
+
+      if (res.status === 200) { 
+        toast.success('Pet added successful!', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+
+        setTimeout(() => {
+          navigate("/Mypet");
+        }, 2000);
+      } else {
+        throw new Error('Registration failed');
       }
-    });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Something went wrong. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+    }
   };
 
   return (
@@ -128,8 +146,10 @@ const MyPets = () => {
           Add Pet
         </button>
       </form>
+              <ToastContainer />
     </div>
   );
 };
+
 
 export default MyPets;

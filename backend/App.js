@@ -5,10 +5,13 @@ const cors = require("cors");
 const app = express();
 
 app.use(cors());
-
-app.use(express.json()); 
+app.use(express.json());
+ 
 const userRoutes = require("./src/routes/UserRoutes");
 app.use(userRoutes);
+
+const PetRoutes = require("./src/routes/PetRoutes");
+app.use(PetRoutes);
 
 mongoose.connect("mongodb://127.0.0.1:27017/Pet_user_data")
   .then(() => {
