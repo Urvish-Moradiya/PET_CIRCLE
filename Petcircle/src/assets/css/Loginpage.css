@@ -7,7 +7,7 @@
     padding: 20px;
     box-sizing: border-box; /* Ensures padding does not overflow the viewport */
   }
-  
+
   .login-card {
     display: flex;
     flex-direction: row;
@@ -22,7 +22,7 @@
   
   .logo-section {
     flex: 1;
-    background-image: url('../image/bg2.jpg');
+    background-image: url('../image//bg2.jpg');
     display: flex;
     flex-direction: column;
     justify-content: center;
