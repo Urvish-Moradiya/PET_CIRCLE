@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import icon from '../assets/image/final.png'
 
 const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
   return (
@@ -7,7 +8,8 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <i className="fas fa-paw text-3xl text-fuchsia-600 mr-2 transform hover:rotate-12 transition-transform"></i>
+            <img src={icon} className='mr-2'/>
+
             <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">PetCircle</span>
           </div>
           <div className="hidden md:flex items-center space-x-8">
@@ -23,13 +25,25 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
               <NavLink
                 key={path}
                 to={path}
-                className={({ isActive }) => `text-gray-600 hover:text-fuchsia-600 cursor-pointer relative group ${isActive ? 'text-fuchsia-600' : ''}`}
+                className={({ isActive }) =>
+                  `text-gray-600 hover:text-fuchsia-600 cursor-pointer relative group ${
+                    isActive ? 'text-purple-700 font-semibold' : ''
+                  }`
+                }
               >
-                <span className="flex items-center">
-                  <i className={`fas fa-${icon} mr-2`}></i>
-                  {label}
-                </span>
-                <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-purple-600 transform origin-left transition-transform duration-300 ${path === window.location.pathname ? 'scale-x-100' : 'scale-x-0'} group-hover:scale-x-100`}></span>
+                {({ isActive }) => (
+                  <>
+                    <span className="flex items-center">
+                      <i className={`fas fa-${icon} mr-2`}></i>
+                      {label}
+                    </span>
+                    <span
+                      className={`absolute bottom-0 left-0 w-full h-0.5 bg-purple-600 transform origin-left transition-transform duration-300 ${
+                        isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                      }`}
+                    ></span>
+                  </>
+                )}
               </NavLink>
             ))}
           </div>
@@ -42,7 +56,10 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
               Login
             </button>
           </div>
-          <button className="md:hidden text-gray-600 hover:text-fuchsia-600" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button
+            className="md:hidden text-gray-600 hover:text-fuchsia-600"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
             <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'} text-2xl`}></i>
           </button>
         </div>
@@ -62,7 +79,11 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
               <NavLink
                 key={path}
                 to={path}
-                className={({ isActive }) => `block w-full text-left px-4 py-2 rounded-lg ${isActive ? 'bg-fuchsia-50 text-fuchsia-600' : 'text-gray-600'}`}
+                className={({ isActive }) =>
+                  `block w-full text-left px-4 py-2 rounded-lg ${
+                    isActive ? 'bg-purple-50 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-fuchsia-50 hover:text-fuchsia-600'
+                  }`
+                }
                 onClick={() => setIsMenuOpen(false)}
               >
                 <i className={`fas fa-${icon} mr-2`}></i>{label}
