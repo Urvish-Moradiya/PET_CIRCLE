@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Communities from './components/Communities';
-import Adoption from './components/Adoption';
-import Messages from './components/Messages';
-import Feed from './components/Feed';
-import Knowledge from './components/Knowledge';
-import Events from './components/Events';
-import PetProfiles from './components/PetProfiles';
-import Footer from './components/Footer';
-import LoginModal from './components/LoginModel';
-import SignupModal from './components/SignupModal';
-import { MessageModal, AddPetModal } from './components/Modals';
-import Home from './components/Home/Home';
+import Communities from './components/Pages/Communities';
+import Adoption from './components/Pages/Adoption';
+import Messages from './components/Pages/Messages';
+import Knowledge from './components/Pages/Knowledge';
+import Events from './components/Pages/Events';
+import PetProfiles from './components/Pages/PetProfiles';
+import Footer from './components/Pages/Footer';
+import LoginModal from './components/Pages/LoginModal';
+import SignupModal from './components/Pages/SignupModal';
+import { MessageModal, AddPetModal } from './components/Pages/Modals';
+import Home from './components/Pages/Home';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -179,10 +178,6 @@ const App = () => {
               setMessageInput={setMessageInput}
             />
           }
-        />
-        <Route
-          path="/feed"
-          element={<Feed likedPosts={likedPosts} handleLike={handleLike} />}
         />
         <Route path="/communities" element={<Communities />} />
         <Route path="/knowledge" element={<Knowledge />} />
