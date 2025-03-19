@@ -16,7 +16,6 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
             {[
               { path: '/', label: 'Home', icon: 'home' },
               { path: '/adoption', label: 'Adoption', icon: 'heart' },
-              { path: '/messages', label: 'Messages', icon: 'envelope' },
               { path: '/communities', label: 'Communities', icon: 'users' },
               { path: '/knowledge', label: 'Knowledge', icon: 'book' },
               { path: '/events', label: 'Events', icon: 'calendar-alt' },
@@ -70,7 +69,6 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
             {[
               { path: '/', label: 'Home', icon: 'home' },
               { path: '/adoption', label: 'Adoption', icon: 'heart' },
-              { path: '/messages', label: 'Messages', icon: 'envelope' },
               { path: '/communities', label: 'Communities', icon: 'users' },
               { path: '/knowledge', label: 'Knowledge', icon: 'book' },
               { path: '/events', label: 'Events', icon: 'calendar-alt' },

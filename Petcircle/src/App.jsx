@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Communities from './components/Pages/Communities';
 import Adoption from './components/Pages/Adoption';
-import Messages from './components/Pages/Messages';
 import Knowledge from './components/Pages/Knowledge';
 import Events from './components/Pages/Events';
 import PetProfiles from './components/Pages/PetProfiles';
@@ -167,18 +166,7 @@ const App = () => {
             />
           }
         />
-        <Route
-          path="/messages"
-          element={
-            <Messages
-              messages={messages}
-              selectedChat={selectedChat}
-              setSelectedChat={setSelectedChat}
-              messageInput={messageInput}
-              setMessageInput={setMessageInput}
-            />
-          }
-        />
+      
         <Route path="/communities" element={<Communities />} />
         <Route path="/knowledge" element={<Knowledge />} />
         <Route path="/events" element={<Events />} />
