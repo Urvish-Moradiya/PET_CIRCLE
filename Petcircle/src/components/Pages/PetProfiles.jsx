@@ -41,7 +41,6 @@ const PetProfiles = ({ pets, setPets }) => {
         favoriteFood: data.favoriteFood,
         activities: data.activities ? data.activities.split(',').map(act => act.trim()) : [],
         profileImage: data.profileImage,
-        gallery: [],
       };
 
       const response = await axios.post('http://localhost:5000/pets', newPet);
@@ -57,31 +56,6 @@ const PetProfiles = ({ pets, setPets }) => {
       }
     } catch (error) {
       toast.error(error.message || 'Failed to add pet.', { position: "top-right", autoClose: 3000 });
-    }
-  };
-
-  const handlePhotoUpload = async (petId, event) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    try {
-      const formData = new FormData();
-      Array.from(files).forEach(file => formData.append('photos', file));
-
-      const response = await axios.post(`http://localhost:5000/pets/${petId}/photos`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      if (response.status === 200) {
-        setPets(pets.map(pet => 
-          pet.id === petId ? { ...pet, gallery: [...pet.gallery, ...response.data.data] } : pet
-        ));
-        toast.success('Photos uploaded successfully!', { position: "top-right", autoClose: 2000 });
-      } else {
-        throw new Error(response.data.message || 'Failed to upload photos');
-      }
-    } catch (error) {
-      toast.error('Failed to upload photos: ' + error.message, { position: "top-right", autoClose: 3000 });
     }
   };
 
@@ -187,11 +161,7 @@ const PetProfiles = ({ pets, setPets }) => {
                     <h3 className="text-2xl font-bold mb-2">{pet.name}</h3>
                     <p className="text-gray-600">{pet.breed}</p>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {pet.gallery.map((image, index) => (
-                      <img key={index} src={image} alt={`${pet.name}'s gallery`} className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-75 transition-opacity" />
-                    ))}
-                  </div>
+                  
                 </div>
                 <div className="space-y-6">
                   <div>
@@ -250,22 +220,7 @@ const PetProfiles = ({ pets, setPets }) => {
                         <i className={`fas ${pet.isEditing ? 'fa-check' : 'fa-edit'} mr-2`}></i>
                         {pet.isEditing ? 'Save Changes' : 'Edit Profile'}
                       </button>
-                      <div key={`upload-${pet.id}`}>
-                        <button
-                          onClick={() => triggerFileInput(pet.id)}
-                          className="rounded-button bg-purple-600 text-white px-19 py-2 whitespace-nowrap hover:bg-purple-700"
-                        >
-                          <i className="fas fa-camera mr-2"></i>Add Photos
-                        </button>
-                        <input
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          ref={el => fileInputRefs.current[pet.id] = el}
-                          onChange={(e) => handlePhotoUpload(pet.id, e)}
-                          className="hidden"
-                        />
-                      </div>
+                     
                     </div>
                   </div>
                 </div>

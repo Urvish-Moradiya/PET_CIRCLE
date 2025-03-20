@@ -11,7 +11,6 @@ const petSchema = new Schema({
   favoriteFood: { type: String, default: 'Not specified' },
   activities: { type: [String], default: [] },
   profileImage: { type: String, default: 'https://via.placeholder.com/300' },
-  gallery: { type: [String], default: [] },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Pet', petSchema);
