@@ -11,8 +11,11 @@ import LoginModal from './components/Pages/LoginModal';
 import SignupModal from './components/Pages/SignupModal';
 import { MessageModal, AddPetModal } from './components/Pages/Modals';
 import Home from './components/Pages/Home';
+import axios from "axios";
+
 
 const App = () => {
+    axios.defaults.baseURL = "http://localhost:5000"
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [likedPosts, setLikedPosts] = useState(new Set());
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -133,14 +136,6 @@ const App = () => {
     },
   ]);
 
-  const handleLike = (postId) => {
-    setLikedPosts((prev) => {
-      const newLiked = new Set(prev);
-      if (newLiked.has(postId)) newLiked.delete(postId);
-      else newLiked.add(postId);
-      return newLiked;
-    });
-  };
 
   return (
     <div className="min-h-screen bg-white">

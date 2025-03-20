@@ -1,4 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SignupModal = ({
   showSignupModal,
@@ -7,12 +11,69 @@ const SignupModal = ({
   setSelectedRole,
   setShowLoginModal,
 }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const [loading, setLoading] = useState(false);
+
   if (!showSignupModal) return null;
 
   const roles = ['pet-owner', 'pet-expert'];
 
+  const submitHandler = async (data) => {
+    setLoading(true);
+    try {
+      const formData = {
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password,
+        role: selectedRole
+      };
+      console.log('Form Data:', formData);
+      
+      const res = await axios.post("http://localhost:5000/user", formData);
+      
+      if (res.status === 200 || res.status === 201) {
+        toast.success('Registration successful!', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+        setTimeout(() => {
+          setShowSignupModal(false);
+        }, 2000);
+      } else {
+        throw new Error('Registration failed');
+      }
+    } catch (error) {
+      console.error('Error:', error.response?.data);
+      toast.error(error.response?.data?.message || 'Something went wrong. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const validationMethod = {
+    nameValidator: { required: { value: true, message: "Name is required" } },
+    emailValidator: {
+      required: { value: true, message: "Email is required" },
+      pattern: {
+        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+        message: "Enter a valid email address",
+      },
+    },
+    passwordValidator: {
+      required: { value: true, message: "Password is required" },
+      minLength: { value: 8, message: "Password must be at least 8 characters long" },
+    },
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gray-600/75 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 w-full max-w-md">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Join PetCircle</h2>
@@ -23,7 +84,7 @@ const SignupModal = ({
             <i className="fas fa-times text-xl"></i>
           </button>
         </div>
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit(submitHandler)}>
           <div>
             <label className="block text-gray-700 mb-2">I am a:</label>
             <div className="flex justify-center gap-4">
@@ -42,6 +103,9 @@ const SignupModal = ({
                 </button>
               ))}
             </div>
+            {!selectedRole && (
+              <span className="text-red-500 text-sm">Please select a role</span>
+            )}
           </div>
           <div>
             <label className="block text-gray-700 mb-2">Full Name</label>
@@ -49,7 +113,11 @@ const SignupModal = ({
               type="text"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
               placeholder="Enter your full name"
+              {...register("fullName", validationMethod.nameValidator)}
             />
+            {errors.fullName && (
+              <span className="text-red-500 text-sm">{errors.fullName.message}</span>
+            )}
           </div>
           <div>
             <label className="block text-gray-700 mb-2">Email</label>
@@ -57,7 +125,11 @@ const SignupModal = ({
               type="email"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
               placeholder="Enter your email"
+              {...register("email", validationMethod.emailValidator)}
             />
+            {errors.email && (
+              <span className="text-red-500 text-sm">{errors.email.message}</span>
+            )}
           </div>
           <div>
             <label className="block text-gray-700 mb-2">Password</label>
@@ -65,13 +137,20 @@ const SignupModal = ({
               type="password"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
               placeholder="Create a password"
+              {...register("password", validationMethod.passwordValidator)}
             />
+            {errors.password && (
+              <span className="text-red-500 text-sm">{errors.password.message}</span>
+            )}
           </div>
           <button
             type="submit"
-            className="!rounded-button bg-fuchsia-600 text-white w-full py-3 cursor-pointer hover:bg-fuchsia-700 whitespace-nowrap"
+            disabled={loading}
+            className={`!rounded-button bg-fuchsia-600 text-white w-full py-3 cursor-pointer hover:bg-fuchsia-700 whitespace-nowrap ${
+              loading ? 'opacity-75 cursor-not-allowed' : ''
+            }`}
           >
-            Sign Up
+            {loading ? 'Signing Up...' : 'Sign Up'}
           </button>
         </form>
         <p className="text-center mt-4 text-gray-600">
@@ -87,6 +166,7 @@ const SignupModal = ({
           </button>
         </p>
       </div>
+      <ToastContainer />
     </div>
   );
 };

@@ -50,8 +50,7 @@ const signup = async (req, res) => {
     // 4. Create a new user object with the hashed password
     const newUser = {
       ...rest, // Include any additional fields from the request (name, etc.)
-      email,   // Ensure email is passed to the new user object
-      phone,   // Ensure phone is passed to the new user object
+      email,  // Ensure phone is passed to the new user object
       password: hashedPassword, // Store the hashed password
     };
 
