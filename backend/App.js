@@ -13,6 +13,15 @@ app.use(userRoutes);
 const PetRoutes = require("./src/routes/PetRoutes");
 app.use(PetRoutes);
 
+const AdoptionRoutes = require("./src/routes/AdoptionRoutes");
+app.use(AdoptionRoutes);
+
+
+const PetadoptRoutes = require("./src/routes/PetadoptRoutes");
+app.use(PetadoptRoutes);
+
+
+
 mongoose.connect("mongodb://127.0.0.1:27017/Pet_circle")
   .then(() => {
     console.log("Database connected....");
