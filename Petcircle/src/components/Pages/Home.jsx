@@ -1,19 +1,63 @@
 import React, { useState } from 'react';
 
 const Home = () => {
-  const [likedPosts, setLikedPosts] = useState(new Set());
+  const [newPostContent, setNewPostContent] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [posts, setPosts] = useState([
+    {
+      id: 1,
+      image: 'https://public.readdy.ai/ai/img_res/4bf4768a1e5602000170686d1adc91d0.jpg',
+      author: 'Emily Parker',
+      petName: 'Max',
+      content: 'Max\'s first day at puppy training class! He\'s such a quick learner 🐾',
+      likes: 234,
+      comments: 45,
+      time: '2 hours ago'
+    },
+    {
+      id: 2,
+      image: 'https://public.readdy.ai/ai/img_res/d6f4add0b6bbaae904e172e6e6b934eb.jpg',
+      author: 'Sarah Thompson',
+      petName: 'Luna',
+      content: 'Luna showing off her majestic fluff after grooming ✨',
+      likes: 312,
+      comments: 67,
+      time: '4 hours ago'
+    }
+  ]);
 
-  const handleLike = (postId) => {
-    setLikedPosts((prev) => {
-      const newLiked = new Set(prev);
-      if (newLiked.has(postId)) newLiked.delete(postId);
-      else newLiked.add(postId);
-      return newLiked;
-    });
+  const handleImageSelect = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCreatePost = () => {
+    if (newPostContent.trim() || selectedImage) {
+      const newPost = {
+        id: posts.length + 1,
+        image: selectedImage || 'https://public.readdy.ai/ai/img_res/2211b1b0aa7423f126cc992fd6b7f98e.jpg',
+        author: 'Current User',
+        petName: 'Your Pet',
+        content: newPostContent,
+        likes: 0,
+        comments: 0,
+        time: 'Just now'
+      };
+
+      setPosts([newPost, ...posts]);
+      setNewPostContent('');
+      setSelectedImage(null);
+    }
   };
 
   return (
-    <div>
+    <div className="min-h-screen ">
       {/* Hero Section */}
       <div className="pt-10">
         <div className="relative w-full h-[550px] bg-gradient-to-br from-purple-50 to-fuchsia-50">
@@ -38,16 +82,16 @@ const Home = () => {
                 </h2>
               </div>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Connect with pet experts, join vibrant communities, and discover the best care practices for your beloved companions. Your perfect pet care companion starts here.
+                Connect with pet experts, join vibrant communities, and discover the best care practices for your beloved companions.
               </p>
               <div className="flex gap-6">
-                <button className="rounded-button bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white px-8 py-4 text-lg font-medium hover:shadow-lg transition-shadow whitespace-nowrap group">
+                <button className="bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white px-8 py-4 text-lg font-medium rounded-lg hover:shadow-lg transition-shadow">
                   Get Started
-                  <i className="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                  <i className="fas fa-arrow-right ml-2"></i>
                 </button>
               </div>
             </div>
-            <div className="relative hidden md:block left-10 pt-6">
+            <div className="relative hidden md:block pt-6">
               <img
                 src="https://public.readdy.ai/ai/img_res/6b011b577298456e1ea7caa85edf82ca.jpg"
                 alt="Happy Pets"
@@ -64,7 +108,7 @@ const Home = () => {
                   </div>
                 </div>
               </div>
-              <div className="absolute -top-0 left-90 bg-white p-4 pm rounded-xl shadow-xl">
+              <div className="absolute bottom-110 left-90 bg-white p-4 rounded-xl shadow-xl">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                     <i className="fas fa-certificate text-purple-600 text-xl"></i>
@@ -81,7 +125,7 @@ const Home = () => {
       </div>
 
       {/* Features Section */}
-      <div className="py-20 bg-gray-50">
+      <div className="py-20 ">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-16">Why Choose PetCircle?</h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -110,145 +154,177 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Communities Section */}
-      <div className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-16">Popular Communities</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { name: 'Dog Lovers United', image: 'https://public.readdy.ai/ai/img_res/8c8506197ee4503a959b264ee6ae5fc4.jpg', members: 15234 },
-              { name: 'Cat Paradise', image: 'https://public.readdy.ai/ai/img_res/cbbd745aa1e2a55d8166b1b7bed10f59.jpg', members: 12876 },
-              { name: 'Exotic Pets Club', image: 'https://public.readdy.ai/ai/img_res/ce455c79cf73b487c46ad74d0bf3f901.jpg', members: 8432 }
-            ].map((community, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer">
-                <div className="h-48 overflow-hidden">
-                  <img src={community.image} alt={community.name} className="w-full h-full object-cover" />
+      {/* Feed Section */}
+      <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-12 gap-8">
+        {/* Left Sidebar */}
+        <div className="col-span-3">
+          <div className="bg-white rounded-lg shadow-sm p-6 sticky top-20">
+            <div className="flex items-center space-x-3 mb-6">
+              <img
+                src="https://public.readdy.ai/ai/img_res/fdcc79b7fdcfa4db13a240b9a3801556.jpg"
+                alt="Profile"
+                className="h-16 w-16 rounded-full object-cover"
+              />
+              <div>
+                <h3 className="font-semibold">Jessica Anderson</h3>
+                <p className="text-sm text-gray-500">@jessicaanderson</p>
+              </div>
+            </div>
+ 
+            <h3 className="font-semibold text-lg mb-4">My Communities</h3>
+            <ul className="space-y-3">
+              {['Dog Lovers', 'Cat Paradise', 'Bird Friends', 'Exotic Pets', 'Pet Training'].map((item) => (
+                <li key={item} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <i className="fas fa-hashtag text-purple-500"></i>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Main Feed */}
+        <div className="col-span-6">
+          {/* Create Post */}
+          <div className="  bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div className="flex items-center space-x-4">
+              <img
+                src="https://public.readdy.ai/ai/img_res/824d0ed6d6226186101ad4859d588688.jpg"
+                alt="User"
+                className="h-10 w-10 rounded-full"
+              />
+              <input
+                type="text"
+                className="flex-1 bg-gray-100 rounded-full px-6 py-3 text-sm"
+                placeholder="Share what your pet is up to..."
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+              />
+            </div>
+            {selectedImage && (
+              <div className="mt-4 relative">
+                <img src={selectedImage} alt="Selected" className="w-full h-48 object-cover rounded-lg" />
+                <button
+                  onClick={() => setSelectedImage(null)}
+                  className="absolute top-2 right-2 bg-gray-800 bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+            )}
+            <div className="flex justify-between mt-4 pt-4 border-t">
+              <label className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 cursor-pointer">
+                <i className="fas fa-image"></i>
+                <span>Photo/Video</span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                />
+              </label>
+              <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-600">
+                <i className="fas fa-map-marker-alt"></i>
+                <span>Location</span>
+              </button>
+              <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-600">
+                <i className="fas fa-tag"></i>
+                <span>Tag Pet</span>
+              </button>
+              <button
+                onClick={handleCreatePost}
+                className="rounded-lg bg-purple-600 text-white px-6 py-2 hover:bg-purple-700 transition duration-300"
+              >
+                Post
+              </button>
+            </div>
+          </div>
+
+          {/* Posts */}
+          {posts.map((post) => (
+            <div key={post.id} className="bg-white rounded-lg shadow-sm mb-6">
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <img
+                    src="https://public.readdy.ai/ai/img_res/73eea721aa8afaaaf90fec09b3c9da6d.jpg"
+                    alt={post.author}
+                    className="h-10 w-10 rounded-full"
+                  />
+                  <div>
+                    <h4 className="font-semibold">{post.author}</h4>
+                    <p className="text-sm text-gray-500">with {post.petName} • {post.time}</p>
+                  </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">{community.name}</h3>
-                  <p className="text-gray-600 mb-4">{community.members.toLocaleString()} members</p>
-                  <button className="rounded-button bg-fuchsia-600 text-white px-6 py-2 w-full cursor-pointer hover:bg-fuchsia-700 whitespace-nowrap">
-                    Join Community
+                <button className="text-gray-400 hover:text-gray-600">
+                  <i className="fas fa-ellipsis-h"></i>
+                </button>
+              </div>
+              <img
+                src={post.image}
+                alt={`${post.petName}'s post`}
+                className="w-full h-[400px] object-cover"
+              />
+              <div className="p-6">
+                <p className="text-gray-800 mb-4">{post.content}</p>
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <div className="flex space-x-6">
+                    <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-600">
+                      <i className="fas fa-heart"></i>
+                      <span>{post.likes}</span>
+                    </button>
+                    <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-600">
+                      <i className="fas fa-comment"></i>
+                      <span>{post.comments}</span>
+                    </button>
+                    <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-600">
+                      <i className="fas fa-bookmark"></i>
+                    </button>
+                  </div>
+                  <button className="text-gray-600 hover:text-purple-600">
+                    <i className="fas fa-share"></i>
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      </div>
 
-      {/* Feed Section */}
-      <div className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold">Pet Community Feed</h2>
-            <div className="flex space-x-4">
-              <button className="rounded-button bg-purple-600 text-white px-6 py-2 cursor-pointer hover:bg-purple-700 whitespace-nowrap">
-                <i className="fas fa-plus mr-2"></i>Create Post
-              </button>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search posts..."
-                  className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 w-64"
-                />
-                <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-              </div>
+        {/* Right Sidebar */}
+        <div className="col-span-3">
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h3 className="font-semibold text-lg mb-4">Suggested Friends</h3>
+            <div className="space-y-4">
+              {([
+                { name: 'Michael Chen', pet: 'Buddy', image: 'https://public.readdy.ai/ai/img_res/34416c102bdb776ee6c5b1cf4dfcad4e.jpg' },
+                { name: 'Rachel White', pet: 'Milo', image: 'https://public.readdy.ai/ai/img_res/9ddc8740315e0b5ace8d350320b254f6.jpg' },
+                { name: 'David Kim', pet: 'Coco', image: 'https://public.readdy.ai/ai/img_res/fc8ac65139d1e5cdfc2b6633ca5872cb.jpg' }
+              ]).map((friend) => (
+                <div key={friend.name} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <img src={friend.image} alt={friend.name} className="h-10 w-10 rounded-full object-cover" />
+                    <div>
+                      <h4 className="font-semibold">{friend.name}</h4>
+                      <p className="text-sm text-gray-500">with {friend.pet}</p>
+                    </div>
+                  </div>
+                  <button className="rounded-lg text-sm bg-purple-600 text-white px-4 py-1 hover:bg-purple-700">
+                    Follow
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-8">
-            {[
-              {
-                id: 1,
-                author: "Dr. Sarah Anderson",
-                username: "@petvet_sarah",
-                time: "2h ago",
-                content: "Important tips for summer pet care! 🌞 #PetHealth #SummerCare",
-                image: "https://public.readdy.ai/ai/img_res/f7dd56f159a9db6b88735e1dd1325bfe.jpg",
-                avatar: "https://public.readdy.ai/ai/img_res/aa2665871874e88b41c81548140005d2.jpg",
-                likes: 2400,
-                comments: 156,
-                verified: true,
-                details: [
-                  "Keep your pets cool this summer! Remember to:",
-                  "1. Provide plenty of fresh water 💧",
-                  "2. Never leave them in parked cars 🚫",
-                  "3. Exercise during cooler hours 🌅",
-                  "4. Watch for signs of heatstroke 🌡️"
-                ]
-              },
-              {
-                id: 2,
-                author: "Michael Chen",
-                username: "@groomer_mike",
-                time: "5h ago",
-                content: "Check out this amazing transformation! #PetGrooming #BeforeAndAfter",
-                images: [
-                  "https://public.readdy.ai/ai/img_res/a9e624832cf7cc12aa3da84c7430198c.jpg",
-                  "https://public.readdy.ai/ai/img_res/19ebcc29bb560123b6af7b79006d3ce4.jpg"
-                ],
-                avatar: "https://public.readdy.ai/ai/img_res/624ec08ce63c0772c7d712642d5dc2ea.jpg",
-                likes: 1800,
-                comments: 89,
-                verified: false
-              }
-            ].map((post) => (
-              <div key={post.id} className="bg-white rounded-lg shadow-lg p-6">
-                <div className="flex items-start space-x-4 mb-4">
-                  <img src={post.avatar} className="w-12 h-12 rounded-full object-cover" alt={post.author} />
-                  <div>
-                    <div className="flex items-center">
-                      <h3 className="font-bold">{post.author}</h3>
-                      {post.verified && <span className="ml-2 text-fuchsia-600"><i className="fas fa-check-circle"></i></span>}
-                      <span className="ml-2 text-gray-500">{post.username}</span>
-                      <span className="ml-2 text-gray-400">{post.time}</span>
-                    </div>
-                    <p className="text-gray-600 mt-1">{post.content}</p>
-                  </div>
-                </div>
-                {post.image && (
-                  <img src={post.image} className="w-full h-[400px] object-cover rounded-lg mb-4" alt="Post content" />
-                )}
-                {post.images && (
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    {post.images.map((img, index) => (
-                      <img key={index} src={img} className="w-full h-[300px] object-cover rounded-lg" alt={`Post image ${index + 1}`} />
-                    ))}
-                  </div>
-                )}
-                <div className="space-y-4">
-                  {post.details && (
-                    <p className="text-gray-800">
-                      {post.details.join('\n')}
-                    </p>
-                  )}
-                  <div className="flex items-center space-x-6">
-                    <button onClick={() => handleLike(post.id)} className="flex items-center space-x-2 text-gray-600 hover:text-fuchsia-600">
-                      <i className={`fa${likedPosts.has(post.id) ? 's' : 'r'} fa-heart`}></i>
-                      <span>{post.likes.toLocaleString()}</span>
-                    </button>
-                    <button className="flex items-center space-x-2 text-gray-600 hover:text-fuchsia-600">
-                      <i className="far fa-comment"></i>
-                      <span>{post.comments}</span>
-                    </button>
-                    <button className="flex items-center space-x-2 text-gray-600 hover:text-fuchsia-600">
-                      <i className="far fa-share-square"></i>
-                      <span>Share</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="font-bold text-xl mb-4">Trending Topics</h3>
-              <div className="flex flex-wrap gap-2">
-                {["#PetHealth", "#AdoptDontShop", "#CutePets", "#PetTraining", "#RescuePets"].map((topic, index) => (
-                  <span key={index} className="bg-fuchsia-100 text-fuchsia-600 px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200">
-                    {topic}
-                  </span>
-                ))}
-              </div>
-            </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h3 className="font-semibold text-lg mb-4">Trending Topics</h3>
+            <ul className="space-y-4">
+              {['#PuppyTraining', '#CatCare', '#PetHealth', '#AdoptDontShop', '#PetPhotography'].map((topic) => (
+                <li key={topic} className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <span className="text-purple-600">{topic}</span>
+                  <span className="text-sm text-gray-500">{Math.floor(Math.random() * 1000)}+ posts</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

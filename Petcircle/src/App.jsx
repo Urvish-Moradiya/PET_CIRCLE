@@ -12,14 +12,13 @@ import SignupModal from './components/Pages/SignupModal';
 import { MessageModal, AddPetModal } from './components/Pages/Modals';
 import Home from './components/Pages/Home';
 import axios from "axios";
+import Profile from './components/Pages/Profile';
 
 
 const App = () => {
     axios.defaults.baseURL = "http://localhost:5000"
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [likedPosts, setLikedPosts] = useState(new Set());
   const [showMessageModal, setShowMessageModal] = useState(false);
-  const [selectedChat, setSelectedChat] = useState(null);
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [petTypeFilter, setPetTypeFilter] = useState('all');
@@ -138,7 +137,7 @@ const App = () => {
 
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#faf9f9]">
       <Navbar isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
         setShowLoginModal={setShowLoginModal}
@@ -156,7 +155,6 @@ const App = () => {
               setSearchQuery={setSearchQuery}
               petTypeFilter={petTypeFilter}
               setPetTypeFilter={setPetTypeFilter}
-              setSelectedChat={setSelectedChat}
               setShowMessageModal={setShowMessageModal}
             />
           }
@@ -165,16 +163,8 @@ const App = () => {
         <Route path="/communities" element={<Communities />} />
         <Route path="/knowledge" element={<Knowledge />} />
         <Route path="/events" element={<Events />} />
-        <Route
-          path="/pets"
-          element={
-            <PetProfiles
-              pets={pets}
-              setPets={setPets}
-              setShowAddPetModal={setShowAddPetModal}
-            />
-          }
-        />
+        <Route path="/pets"  element={<PetProfiles pets={pets} setPets={setPets} setShowAddPetModal={setShowAddPetModal}/>}/>
+        <Route path='/profile' element={<Profile/>}/>
       </Routes>
       <Footer />
       <LoginModal
