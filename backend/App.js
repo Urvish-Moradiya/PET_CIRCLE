@@ -22,6 +22,12 @@ app.use(PetadoptRoutes);
 
 const CommunityRoutes = require("./src/routes/CommunityRoutes");
 app.use("/", CommunityRoutes);
+
+
+const EventRoutes = require("./src/routes/EventRoutes");
+app.use(EventRoutes);
+
+
 mongoose.connect("mongodb://127.0.0.1:27017/Pet_circle")
   .then(() => {
     console.log("Database connected....");

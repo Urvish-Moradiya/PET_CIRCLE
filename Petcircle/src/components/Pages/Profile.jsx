@@ -1,7 +1,18 @@
 import React from 'react';
-import profile from '../../assets/image/profile.jpg'
-import background from '../../assets/image/background.jpg'
+import profile from '../../assets/image/profile.jpg';
+import background from '../../assets/image/background.jpg';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+
 const Profile = () => {
+  const navigate = useNavigate(); // Hook for navigation
+
+  const handleLogout = () => {
+    // Clear auth token from localStorage
+    localStorage.removeItem('authToken');
+    // Redirect to home page or login page
+    navigate('/');
+  };
+
   return (
     <div className="pt-20 px-4 max-w-7xl mx-auto">
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -41,15 +52,23 @@ const Profile = () => {
                     <i className="fas fa-map-marker-alt text-gray-500"></i>
                     <span className="text-gray-700">San Francisco, CA</span>
                   </div>
-  
                 </div>
               </div>
             </div>
-            <button  
-              className="rounded-button bg-purple-600 text-white px-6 py-2 hover:bg-purple-700 transition duration-300 whitespace-nowrap"
-            >
-              Edit Profile
-            </button>
+            <div className="space-x-4">
+              <button  
+                className="rounded-button bg-purple-600 text-white px-6 py-2 hover:bg-purple-700 transition duration-300 whitespace-nowrap"
+              >
+                Edit Profile
+              </button>
+              <button
+                onClick={handleLogout}
+                className="rounded-button bg-red-600 text-white px-6 py-2 hover:bg-red-700 transition duration-300 whitespace-nowrap"
+              >
+                <i className="fas fa-sign-out-alt mr-2"></i>
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </div>

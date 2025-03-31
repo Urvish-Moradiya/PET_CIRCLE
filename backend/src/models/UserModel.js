@@ -16,8 +16,9 @@ const userSchema = new Schema({
     required: true,
   },
   role: {
-    type:String
+    type: String, // e.g., 'user', 'admin'
   },
+  pets: [{ type: Schema.Types.ObjectId, ref: 'Pet' }], // Reference to Pet model
 }, { timestamps: true });
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model("User", userSchema);

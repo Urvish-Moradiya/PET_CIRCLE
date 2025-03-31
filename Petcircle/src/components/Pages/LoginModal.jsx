@@ -35,6 +35,9 @@ const LoginModal = ({
       const result = await response.json();
 
       if (response.ok) {
+        // Add token to localStorage
+        localStorage.setItem('authToken', result.data.token);
+
         toast.success('Login successful!', {
           position: "top-right",
           autoClose: 2000,
@@ -42,12 +45,8 @@ const LoginModal = ({
           closeOnClick: true,
         });
 
-        localStorage.setItem('role', result.data.role);
-
         setTimeout(() => {
           setShowLoginModal(false);
-          // You might want to add navigation logic here if using react-router
-          // navigate("/dashboard");
         }, 2000);
       } else {
         toast.error(result.message || "Invalid credentials", {

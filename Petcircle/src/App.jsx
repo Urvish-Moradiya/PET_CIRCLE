@@ -164,7 +164,7 @@ const App = () => {
         <Route path="/knowledge" element={<Knowledge />} />
         <Route path="/events" element={<Events />} />
         <Route path="/pets"  element={<PetProfiles pets={pets} setPets={setPets} setShowAddPetModal={setShowAddPetModal}/>}/>
-        <Route path='/profile' element={<Profile/>}/>
+        <Route path='/profile' element={<Profile setShowLoginModal={setShowLoginModal} />}/>
       </Routes>
       <Footer />
       <LoginModal
@@ -177,11 +177,11 @@ const App = () => {
         setShowSignupModal={setShowSignupModal}
       />
       <SignupModal
-        showSignupModal={showSignupModal}
-        setShowSignupModal={setShowSignupModal}
-        selectedRole={selectedRole}
-        setSelectedRole={setSelectedRole}
-        setShowLoginModal={setShowLoginModal}
+showSignupModal={showSignupModal}
+setShowSignupModal={setShowSignupModal}
+selectedRole={selectedRole}
+setSelectedRole={setSelectedRole}
+setShowLoginModal={setShowLoginModal}
       />
       <MessageModal
         showMessageModal={showMessageModal}

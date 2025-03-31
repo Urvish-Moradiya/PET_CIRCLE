@@ -11,6 +11,7 @@ const SignupModal = ({
   setSelectedRole,
   setShowLoginModal,
 }) => {
+  
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
 

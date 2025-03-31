@@ -1,8 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import icon from '../assets/image/final.png'
+import icon from '../assets/image/final.png';
 
 const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
+  // Check if user is logged in by checking authToken in localStorage
+  const isLoggedIn = !!localStorage.getItem('authToken');
+
   return (
     <nav className="fixed top-0 w-full bg-white shadow-md z-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -35,31 +38,29 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
                       <i className={`fas fa-${icon} mr-2`}></i>
                       {label}
                     </span>
-                    <span
-                      className={`absolute bottom-0 left-0 w-full h-0.5 bg-purple-600 transform origin-left transition-transform duration-300 ${
-                        isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                      }`}
-                    ></span>
-                  </>
+                   </>
                 )}
               </NavLink>
             ))}
           </div>
           <div className="hidden md:flex items-center space-x-4">
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="!rounded-button bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-2 cursor-pointer hover:opacity-90 transition-opacity whitespace-nowrap transform hover:scale-105 transition-transform"
-            >
-              <i className="fas fa-sign-in-alt mr-2"></i>
-              Login
-            </button>
-            <NavLink
-              to="/profile"
-              className="bg-gradient-to-r from-fuchsia-600 to-rose-500 text-white px-6 py-2 rounded-full cursor-pointer hover:opacity-90 transition-opacity whitespace-nowrap transform hover:scale-105 transition-transform"
-            >
-              <i className="fas fa-user mr-2"></i>
-              Profile
-            </NavLink>
+            {isLoggedIn ? (
+              <NavLink
+                to="/profile"
+                className="bg-gradient-to-r from-fuchsia-600 to-rose-500 text-white px-6 py-2 rounded-full cursor-pointer hover:opacity-90 transition-opacity whitespace-nowrap transform hover:scale-105 transition-transform"
+              >
+                <i className="fas fa-user mr-2"></i>
+                Profile
+              </NavLink>
+            ) : (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="!rounded-button bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-2 cursor-pointer hover:opacity-90 transition-opacity whitespace-nowrap transform hover:scale-105 transition-transform"
+              >
+                <i className="fas fa-sign-in-alt mr-2"></i>
+                Login
+              </button>
+            )}
           </div>
           <button
             className="md:hidden text-gray-600 hover:text-fuchsia-600"
@@ -94,22 +95,25 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen, setShowLoginModal }) => {
               </NavLink>
             ))}
             <div className="pt-2 border-t space-y-2">
-              <button
-                onClick={() => {
-                  setShowLoginModal(true);
-                  setIsMenuOpen(false);
-                }}
-                className="!rounded-button w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-2 whitespace-nowrap"
-              >
-                <i className="fas fa-sign-in-alt mr-2"></i>Login
-              </button>
-              <button
-                to="/profile"
-                className="block w-full text-center bg-gradient-to-r from-fuchsia-600 to-rose-500 text-white px-4 py-1 rounded-lg whitespace-nowrap"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <i className="fas fa-user mr-2"></i>Profile
+              {isLoggedIn ? (
+                <NavLink
+                  to="/profile"
+                  className="block w-full text-center bg-gradient-to-r from-fuchsia-600 to-rose-500 text-white px-4 py-1 rounded-lg whitespace-nowrap"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <i className="fas fa-user mr-2"></i>Profile
+                </NavLink>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowLoginModal(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="!rounded-button w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-2 whitespace-nowrap"
+                >
+                  <i className="fas fa-sign-in-alt mr-2"></i>Login
                 </button>
+              )}
             </div>
           </div>
         </div>
