@@ -18,7 +18,11 @@ const userSchema = new Schema({
   role: {
     type: String, // e.g., 'user', 'admin'
   },
-  pets: [{ type: Schema.Types.ObjectId, ref: 'Pet' }], // Reference to Pet model
+  bio: {
+    type: String, // New field for user bio
+    default: "", // Optional: default empty string
+  },
+  pets: [{ type: Schema.Types.ObjectId, ref: 'Pet' }],
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

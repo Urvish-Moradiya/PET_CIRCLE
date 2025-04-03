@@ -15,12 +15,18 @@ const PetProfiles = ({ pets, setPets }) => {
       try {
         const response = await axios.get('http://localhost:5000/pets');
         if (response.status === 200) {
-          setPets(response.data.data);
+          const petData = Array.isArray(response.data.data) 
+            ? response.data.data.map(pet => ({
+                ...pet,
+                activities: Array.isArray(pet.activities) ? pet.activities : [],
+              }))
+            : [];
+          setPets(petData);
         } else {
           throw new Error(response.data.message || 'Failed to fetch pets');
         }
       } catch (error) {
-        toast.error('Failed Halloween pets: ' + error.message, {
+        toast.error('Failed to fetch pets: ' + error.message, {
           position: "top-right",
           autoClose: 3000,
         });
@@ -37,10 +43,10 @@ const PetProfiles = ({ pets, setPets }) => {
         breed: data.breed,
         birthday: data.birthday,
         weight: Number(data.weight),
-        allergies: data.allergies,
-        favoriteFood: data.favoriteFood,
+        allergies: data.allergies || '',
+        favoriteFood: data.favoriteFood || '',
         activities: data.activities ? data.activities.split(',').map(act => act.trim()) : [],
-        profileImage: data.profileImage,
+        profileImage: data.profileImage || 'https://via.placeholder.com/150', // Fallback image
       };
 
       const response = await axios.post('http://localhost:5000/pets', newPet);
@@ -97,12 +103,20 @@ const PetProfiles = ({ pets, setPets }) => {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-gray-700 mb-2">Pet Name</label>
-                  <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter pet name" {...register("name", validationMethod.nameValidator)} />
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    placeholder="Enter pet name" 
+                    {...register("name", validationMethod.nameValidator)} 
+                  />
                   {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
                 </div>
                 <div>
                   <label className="block text-gray-700 mb-2">Pet Type</label>
-                  <select className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" {...register("type", validationMethod.typeValidator)}>
+                  <select 
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    {...register("type", validationMethod.typeValidator)}
+                  >
                     <option value="">Select pet type</option>
                     <option value="Dog">Dog</option>
                     <option value="Cat">Cat</option>
@@ -113,120 +127,199 @@ const PetProfiles = ({ pets, setPets }) => {
                 </div>
                 <div>
                   <label className="block text-gray-700 mb-2">Breed</label>
-                  <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter breed" {...register("breed", validationMethod.breedValidator)} />
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    placeholder="Enter breed" 
+                    {...register("breed", validationMethod.breedValidator)} 
+                  />
                   {errors.breed && <span className="text-red-500 text-sm">{errors.breed.message}</span>}
                 </div>
                 <div>
                   <label className="block text-gray-700 mb-2">Birthday</label>
-                  <input type="date" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" {...register("birthday", validationMethod.birthdayValidator)} />
+                  <input 
+                    type="date" 
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    {...register("birthday", validationMethod.birthdayValidator)} 
+                  />
                   {errors.birthday && <span className="text-red-500 text-sm">{errors.birthday.message}</span>}
                 </div>
                 <div>
                   <label className="block text-gray-700 mb-2">Weight (in kg)</label>
-                  <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter weight" {...register("weight", validationMethod.weightValidator)} />
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    placeholder="Enter weight" 
+                    {...register("weight", validationMethod.weightValidator)} 
+                  />
                   {errors.weight && <span className="text-red-500 text-sm">{errors.weight.message}</span>}
                 </div>
                 <div>
                   <label className="block text-gray-700 mb-2">Allergies (optional)</label>
-                  <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter allergies (if any)" {...register("allergies")} />
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    placeholder="Enter allergies (if any)" 
+                    {...register("allergies")} 
+                  />
                 </div>
                 <div>
                   <label className="block text-gray-700 mb-2">Favorite Food (optional)</label>
-                  <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter favorite food" {...register("favoriteFood")} />
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    placeholder="Enter favorite food" 
+                    {...register("favoriteFood")} 
+                  />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-gray-700 mb-2">Favorite Activities (comma-separated, optional)</label>
-                  <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="e.g., Fetch, Swimming, Napping" {...register("activities")} />
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    placeholder="e.g., Fetch, Swimming, Napping" 
+                    {...register("activities")} 
+                  />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-gray-700 mb-2">Profile Image URL (optional)</label>
-                  <input type="url" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter image URL" {...register("profileImage")} />
+                  <input 
+                    type="url" 
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    placeholder="Enter image URL" 
+                    {...register("profileImage")} 
+                  />
                 </div>
               </div>
-              <button type="submit" className="rounded-button bg-purple-600 text-white w-full py-3 cursor-pointer hover:bg-purple-700 whitespace-nowrap">Add Pet</button>
+              <button 
+                type="submit" 
+                className="rounded-button bg-purple-600 text-white w-full py-3 cursor-pointer hover:bg-purple-700 whitespace-nowrap"
+              >
+                Add Pet
+              </button>
             </form>
           </div>
         )}
 
         <div className="grid md:grid-cols-2 gap-8">
-          {pets.map((pet) => (
-            <div key={pet.id} className="bg-white rounded-lg shadow-lg mb-8">
-              <div className="grid md:grid-cols-2 gap-8 p-8">
-                <div className="space-y-6">
-                  <div className="relative">
-                    <img src={pet.profileImage} alt={pet.name} className="w-full h-80 object-cover rounded-lg" />
-                    <span className="absolute top-4 right-4 bg-fuchsia-100 text-fuchsia-600 px-3 py-1 rounded-full">{pet.type}</span>
+          {Array.isArray(pets) && pets.length > 0 ? (
+            pets.map((pet) => (
+              <div key={pet.id} className="bg-white rounded-lg shadow-lg mb-8">
+                <div className="grid md:grid-cols-2 gap-8 p-8">
+                  <div className="space-y-6">
+                    <div className="relative">
+                      <img 
+                        src={pet.profileImage || 'https://via.placeholder.com/150'} 
+                        alt={pet.name} 
+                        className="w-full h-80 object-cover rounded-lg" 
+                      />
+                      <span className="absolute top-4 right-4 bg-fuchsia-100 text-fuchsia-600 px-3 py-1 rounded-full">
+                        {pet.type}
+                      </span>
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-2xl font-bold mb-2">{pet.name}</h3>
+                      <p className="text-gray-600">{pet.breed}</p>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <h3 className="text-2xl font-bold mb-2">{pet.name}</h3>
-                    <p className="text-gray-600">{pet.breed}</p>
-                  </div>
-                  
-                </div>
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-xl font-semibold mb-4">Basic Information</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center text-gray-600">
-                        <i className="fas fa-birthday-cake w-6"></i>
-                        <span className="mr-2">Birthday:</span>
-                        {pet.isEditing ? (
-                          <input type="date" value={pet.birthday} onChange={(e) => setPets(pets.map(p => p.id === pet.id ? { ...p, birthday: e.target.value } : p))} className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
-                        ) : (
-                          <span>{new Date(pet.birthday).toLocaleDateString()}</span>
-                        )}
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-xl font-semibold mb-4">Basic Information</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center text-gray-600">
+                          <i className="fas fa-birthday-cake w-6"></i>
+                          <span className="mr-2">Birthday:</span>
+                          {pet.isEditing ? (
+                            <input 
+                              type="date" 
+                              value={pet.birthday} 
+                              onChange={(e) => setPets(pets.map(p => p.id === pet.id ? { ...p, birthday: e.target.value } : p))} 
+                              className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-500" 
+                            />
+                          ) : (
+                            <span>{new Date(pet.birthday).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <i className="fas fa-weight w-6"></i>
+                          <span className="mr-2">Weight:</span>
+                          {pet.isEditing ? (
+                            <input 
+                              type="text" 
+                              value={pet.weight} 
+                              onChange={(e) => setPets(pets.map(p => p.id === pet.id ? { ...p, weight: e.target.value } : p))} 
+                              className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-500" 
+                            />
+                          ) : (
+                            <span>{pet.weight} kg</span>
+                          )}
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <i className="fas fa-exclamation-circle w-6"></i>
+                          <span className="mr-2">Allergies:</span>
+                          {pet.isEditing ? (
+                            <input 
+                              type="text" 
+                              value={pet.allergies} 
+                              onChange={(e) => setPets(pets.map(p => p.id === pet.id ? { ...p, allergies: e.target.value } : p))} 
+                              className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-500" 
+                            />
+                          ) : (
+                            <span>{pet.allergies || 'None'}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <i className="fas fa-bone w-6"></i>
+                          <span className="mr-2">Favorite Food:</span>
+                          {pet.isEditing ? (
+                            <input 
+                              type="text" 
+                              value={pet.favoriteFood} 
+                              onChange={(e) => setPets(pets.map(p => p.id === pet.id ? { ...p, favoriteFood: e.target.value } : p))} 
+                              className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-500" 
+                            />
+                          ) : (
+                            <span>{pet.favoriteFood || 'None'}</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center text-gray-600">
-                        <i className="fas fa-weight w-6"></i>
-                        <span className="mr-2">Weight:</span>
-                        {pet.isEditing ? (
-                          <input type="text" value={pet.weight} onChange={(e) => setPets(pets.map(p => p.id === pet.id ? { ...p, weight: e.target.value } : p))} className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold mb-4">Favorite Activities</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {Array.isArray(pet.activities) && pet.activities.length > 0 ? (
+                          pet.activities.map((activity, index) => (
+                            <span 
+                              key={index} 
+                              className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full"
+                            >
+                              {activity}
+                            </span>
+                          ))
                         ) : (
-                          <span>{pet.weight}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <i className="fas fa-exclamation-circle w-6"></i>
-                        <span className="mr-2">Allergies:</span>
-                        {pet.isEditing ? (
-                          <input type="text" value={pet.allergies} onChange={(e) => setPets(pets.map(p => p.id === pet.id ? { ...p, allergies: e.target.value } : p))} className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
-                        ) : (
-                          <span>{pet.allergies}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <i className="fas fa-bone w-6"></i>
-                        <span className="mr-2">Favorite Food:</span>
-                        {pet.isEditing ? (
-                          <input type="text" value={pet.favoriteFood} onChange={(e) => setPets(pets.map(p => p.id === pet.id ? { ...p, favoriteFood: e.target.value } : p))} className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
-                        ) : (
-                          <span>{pet.favoriteFood}</span>
+                          <span className="text-gray-600">No activities listed.</span>
                         )}
                       </div>
                     </div>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold mb-4">Favorite Activities</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {pet.activities.map((activity, index) => (
-                        <span key={index} className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full">{activity}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold mb-4">Quick Actions</h4>
-                    <div className="grid grid-cols-1 gap-4">
-                      <button onClick={() => setPets(pets.map(p => p.id === pet.id ? { ...p, isEditing: !p.isEditing } : p))} className="rounded-button bg-fuchsia-600 text-white px-4 py-2 whitespace-nowrap">
-                        <i className={`fas ${pet.isEditing ? 'fa-check' : 'fa-edit'} mr-2`}></i>
-                        {pet.isEditing ? 'Save Changes' : 'Edit Profile'}
-                      </button>
-                     
+                    <div>
+                      <h4 className="text-xl font-semibold mb-4">Quick Actions</h4>
+                      <div className="grid grid-cols-1 gap-4">
+                        <button 
+                          onClick={() => setPets(pets.map(p => p.id === pet.id ? { ...p, isEditing: !p.isEditing } : p))} 
+                          className="rounded-button bg-fuchsia-600 text-white px-4 py-2 whitespace-nowrap"
+                        >
+                          <i className={`fas ${pet.isEditing ? 'fa-check' : 'fa-edit'} mr-2`}></i>
+                          {pet.isEditing ? 'Save Changes' : 'Edit Profile'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-600 text-center col-span-2">No pets available yet.</p>
+          )}
         </div>
       </div>
       <ToastContainer />

@@ -2,20 +2,30 @@ const userModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 
 const loginUser = async (req, res) => {
-  console.log("Login request received"); // Add this line to check if the route is hit
+  console.log("Login request received");
   try {
     const { email, password } = req.body;
     const foundUserFromEmail = await userModel.findOne({ email });
-    
+
     if (foundUserFromEmail) {
       const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
       if (isMatch) {
+        // Use user ID as a simple authToken (not secure for production, but per your request)
+        const authToken = foundUserFromEmail._id.toString();
         res.status(200).json({
           message: "Login successful",
-          data: foundUserFromEmail,
+          data: {
+            token: authToken,
+            user: {
+              _id: foundUserFromEmail._id,
+              fullName: foundUserFromEmail.fullName,
+              email: foundUserFromEmail.email,
+              bio: foundUserFromEmail.bio || "",
+            },
+          },
         });
       } else {
-        res.status(404).json({ message: "Invalid credentials" });           
+        res.status(404).json({ message: "Invalid credentials" });
       }
     } else {
       res.status(404).json({ message: "Email not found" });
@@ -26,109 +36,97 @@ const loginUser = async (req, res) => {
   }
 };
 
-
-
 const signup = async (req, res) => {
   try {
-    const { email, phone, password, ...rest } = req.body; 
-    //1. check karna ki ye email,number register he ya nhi
-    const existingUser = await userModel.findOne({
-      $or: [{ email: email }, { phone: phone }]
-    });
+    const { fullName, email, password } = req.body;
+    const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
-      // 2. If user exists, return an error response
-      return res.status(400).json({
-        message: "User already exists",
-      });
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    // 3. Hash the password using bcrypt
-    const salt = bcrypt.genSaltSync(10); // Generate a salt with 10 rounds (makes the password harder to crack)
-    const hashedPassword = bcrypt.hashSync(password, salt); // Hash the password
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(password, salt);
 
-    // 4. Create a new user object with the hashed password
     const newUser = {
-      ...rest, // Include any additional fields from the request (name, etc.)
-      email,  // Ensure phone is passed to the new user object
-      password: hashedPassword, // Store the hashed password
+      fullName,
+      email,
+      password: hashedPassword,
+      bio: "", // Default empty bio
     };
 
-    // 5. Save the new user to the database
     const createdUser = await userModel.create(newUser);
+    const authToken = createdUser._id.toString();
 
-    // 6. Send a success response with the newly created user data
     res.status(201).json({
       message: "User created successfully",
-      data: createdUser,
+      data: {
+        token: authToken,
+        user: {
+          _id: createdUser._id,
+          fullName: createdUser.fullName,
+          email: createdUser.email,
+          bio: createdUser.bio,
+        },
+      },
     });
-
   } catch (err) {
-    // 7. If an error occurs, return an error response
-    res.status(500).json({
-      message: "server error",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-// Add User Function (Direct Add)
-const addUser = async (req, res) => {
+// New function to update user bio
+const updateUserBio = async (req, res) => {
   try {
-    const savedUser = await userModel.create(req.body);
-    res.json({
-      message: "User saved successfully",
-      data: savedUser,
+    const { userId, bio } = req.body;
+    const updatedUser = await userModel.findByIdAndUpdate(
+      userId,
+      { bio },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Bio updated successfully",
+      data: {
+        _id: updatedUser._id,
+        fullName: updatedUser.fullName,
+        email: updatedUser.email,
+        bio: updatedUser.bio,
+      },
     });
   } catch (err) {
-    res.status(500).json({ message: "Error adding user", error: err });
+    res.status(500).json({ message: "Error updating bio", error: err });
   }
 };
 
-// Get All Users
-const getAllUsers = async (req, res) => {
-  try {
-    const users = await userModel.find().populate("roleId");
-    res.json({
-      message: "Users fetched successfully",
-      data: users,
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching users", error: err });
-  }
-};
-
-// Get User By ID
 const getUserById = async (req, res) => {
   try {
     const foundUser = await userModel.findById(req.params.id);
+    if (!foundUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
     res.json({
       message: "User fetched successfully",
-      data: foundUser,
+      data: {
+        _id: foundUser._id,
+        fullName: foundUser.fullName,
+        email: foundUser.email,
+        role: foundUser.role || "user", // Default to "user" if not set
+        bio: foundUser.bio || "",
+      },
     });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching user", error: err });
-  }
-};
-
-// Delete User By ID
-const deleteUserById = async (req, res) => {
-  try {
-    const deletedUser = await userModel.findByIdAndDelete(req.params.id);
-    res.json({
-      message: "User deleted successfully",
-      data: deletedUser,
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting user", error: err });
+    res.status(500).json({ message: "Error fetching user", error: err.message });
   }
 };
 
 module.exports = {
-  addUser,
-  getAllUsers,
-  getUserById,
-  deleteUserById,
   signup,
   loginUser,
+  updateUserBio,
+  getUserById,
 };
