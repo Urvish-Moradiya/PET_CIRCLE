@@ -4,7 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
-const LoginModal = ({ setShowSignupModal }) => {
+const LoginModal = ({ setUser }) => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -24,7 +24,8 @@ const LoginModal = ({ setShowSignupModal }) => {
       if (response.ok) {
         localStorage.setItem('authToken', result.data.token);
         localStorage.setItem('userData', JSON.stringify(result.data.user));
-
+        setUser(result.data.user); // Update parent state to trigger Navbar re-render
+        
         toast.success('Login successful!', {
           position: "top-right",
           autoClose: 2000,
@@ -65,85 +66,92 @@ const LoginModal = ({ setShowSignupModal }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+    <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row">
       {/* Left Section - Decorative */}
-      <div className="lg:w-1/2 bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-8">
-        <div className="text-white text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-fadeIn">
-            Welcome to PetCircle
-          </h1>
-          <p className="text-lg md:text-xl opacity-90">
-            Connect with pet lovers, share stories, and find your furry friends
+      <div className="lg:w-1/2 bg-gradient-to-br from-purple-700 via-purple-600 to-pink-600 p-8 flex items-center justify-center">
+        <div className="text-white text-center space-y-6 animate-fade-in">
+          <div className="relative">
+            <div className="absolute -top-12 -left-12 w-24 h-24 bg-white/10 rounded-full animate-pulse"></div>
+            <h1 className="text-4xl font-extrabold tracking-tight relative">
+              PetCircle
+              <span className="absolute -top-2 -right-6 text-2xl text-pink-300">✨</span>
+            </h1>
+          </div>
+          <p className="text-lg opacity-90 max-w-xs mx-auto">
+            Join a vibrant community of pet enthusiasts and their furry companions
           </p>
-          <div className="mt-8">
-            <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center">
-              <i className="fas fa-paw text-3xl"></i>
+          <div className="mt-6 flex justify-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center transform hover:scale-110 transition-transform duration-300">
+              <i className="fas fa-paw text-xl"></i>
+            </div>
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center transform hover:scale-110 transition-transform duration-300">
+              <i className="fas fa-heart text-xl"></i>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right Section - Login Form */}
-      <div className="lg:w-1/2 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-            Sign In
-          </h2>
-          
+      <div className="lg:w-1/2 p-8 flex items-center justify-center">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Welcome Back
+            </h2>
+            <p className="mt-2 text-gray-600">Sign in to your account</p>
+          </div>
+
           <form onSubmit={handleSubmit(submitHandler)} className="space-y-6">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Email Address
               </label>
-              <div className="relative">
-                <i className="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <div className="relative group">
+                <i className="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"></i>
                 <input
                   type="email"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 transition-all duration-200"
-                  placeholder="Enter your email"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 transition-all duration-300"
+                  placeholder="your@email.com"
                   {...register("email", validationMethod.emailValidator)}
                   disabled={loading}
                 />
               </div>
               {errors.email && (
-                <span className="text-red-500 text-sm mt-1 block">
-                  {errors.email.message}
-                </span>
+                <span className="text-red-500 text-xs">{errors.email.message}</span>
               )}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <div className="relative">
-                <i className="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <div className="relative group">
+                <i className="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"></i>
                 <input
                   type="password"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 transition-all duration-200"
-                  placeholder="Enter your password"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 transition-all duration-300"
+                  placeholder="••••••••"
                   {...register("password", validationMethod.passwordValidator)}
                   disabled={loading}
                 />
               </div>
               {errors.password && (
-                <span className="text-red-500 text-sm mt-1 block">
-                  {errors.password.message}
-                </span>
+                <span className="text-red-500 text-xs">{errors.password.message}</span>
               )}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 rounded-lg text-white font-semibold bg-gradient-to-r from-fuchsia-600 to-rose-500 hover:from-fuchsia-700 hover:to-rose-600 transition-all duration-200 transform hover:scale-105 ${
-                loading ? 'opacity-75 cursor-not-allowed' : ''
+              className={`w-full py-3 px-4 rounded-xl text-white font-medium bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-200 ${
+                loading ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
               {loading ? (
                 <span className="flex items-center justify-center">
                   <i className="fas fa-spinner fa-spin mr-2"></i>
-                  Logging in...
+                  Signing in...
                 </span>
               ) : (
                 'Sign In'
@@ -151,29 +159,34 @@ const LoginModal = ({ setShowSignupModal }) => {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{' '}
+          <div className="text-center space-y-3">
+            <p className="text-sm text-gray-600">
+              New to PetCircle?{' '}
               <button
                 onClick={() => navigate('/signup')}
-                className="text-fuchsia-600 hover:text-fuchsia-700 font-medium transition-colors duration-200"
+                className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200"
                 disabled={loading}
               >
-                Sign Up
+                Create an account
               </button>
             </p>
             <a
               href="#"
-              className="text-sm text-gray-500 hover:text-fuchsia-600 mt-2 block"
+              className="text-sm text-gray-500 hover:text-purple-600 transition-colors duration-200"
             >
-              Forgot Password?
+              Forgot your password?
             </a>
           </div>
         </div>
       </div>
-
-      <ToastContainer />
     </div>
+    <ToastContainer 
+      position="top-right"
+      autoClose={3000}
+      hideProgressBar
+      theme="colored"
+    />
+  </div>
   );
 };
 

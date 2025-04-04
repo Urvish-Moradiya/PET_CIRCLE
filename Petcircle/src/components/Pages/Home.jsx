@@ -139,7 +139,7 @@ const Home = () => {
     <div className="min-h-screen ">
       {/* Hero Section */}
       <div className="pt-10">
-        <div className="relative w-full h-[550px] bg-gradient-to-br from-purple-50 to-fuchsia-50">
+        <div className="relative w-full h-[570px] bg-gradient-to-br from-purple-50 to-fuchsia-50">
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -right-10 top-1/2 transform -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-fuchsia-100 to-purple-100 rounded-full opacity-30"></div>
             <div className="absolute right-20 top-20 w-[150px] h-[150px] bg-gradient-to-br from-purple-200 to-fuchsia-200 rounded-full opacity-20"></div>
@@ -174,9 +174,9 @@ const Home = () => {
               <img
                 src="https://public.readdy.ai/ai/img_res/6b011b577298456e1ea7caa85edf82ca.jpg"
                 alt="Happy Pets"
-                className="w-[500px] h-[500px] rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
+                className="w-[500px] h-[480px] rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute -bottom-4 -left-20 bg-white p-4 rounded-xl shadow-xl">
+              <div className="absolute -bottom-6 -left-20 bg-white p-4 rounded-xl shadow-xl">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-fuchsia-100 rounded-full flex items-center justify-center">
                     <i className="fas fa-heart text-fuchsia-600 text-lg"></i>
@@ -187,7 +187,7 @@ const Home = () => {
                   </div>
                 </div>
               </div>
-              <div className="absolute bottom-110 left-90 bg-white p-4 rounded-xl shadow-xl">
+              <div className="absolute bottom-105 left-85 bg-white p-4 rounded-xl shadow-xl">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                     <i className="fas fa-certificate text-purple-600 text-xl"></i>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Communities from './components/Pages/Communities';
@@ -14,7 +14,6 @@ import Profile from './components/Pages/Profile';
 import LoginModal from './components/Pages/LoginModal';
 import SignupModal from './components/Pages/SignupModal';
 
-
 const App = () => {
   axios.defaults.baseURL = "http://localhost:5000";
 
@@ -24,9 +23,9 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [petTypeFilter, setPetTypeFilter] = useState('all');
   const [showAddPetModal, setShowAddPetModal] = useState(false);
-  const [pets, setPets] = useState();
-  const [adoptionListings] = useState();
-  const [selectedRole, setSelectedRole] = useState('pet-owner');
+  const [pets, setPets] = useState(); // Consider initializing as empty array: []
+  const [adoptionListings] = useState(); // Consider initializing as empty array: []
+  const [user, setUser] = useState(null);
   const [newPetForm, setNewPetForm] = useState({
     name: '',
     type: '',
@@ -37,8 +36,6 @@ const App = () => {
     favoriteFood: '',
     activities: '',
   });
-
-
 
   const [messages] = useState([
     {
@@ -57,13 +54,24 @@ const App = () => {
     },
   ]);
 
+  // Load user from localStorage on initial render
+  useEffect(() => {
+    const storedUser = localStorage.getItem('userData');
+    const token = localStorage.getItem('authToken');
+    if (storedUser && token) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#faf9f9] flex flex-col">
-      <Navbar 
+      <Navbar
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
+        user={user}
+        setUser={setUser}
       />
-      
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route
@@ -82,23 +90,32 @@ const App = () => {
         <Route path="/communities" element={<Communities />} />
         <Route path="/knowledge" element={<Knowledge />} />
         <Route path="/events" element={<Events />} />
-        <Route 
-          path="/pets" 
+        <Route
+          path="/pets"
           element={
-            <PetProfiles 
-              pets={pets} 
-              setPets={setPets} 
+            <PetProfiles
+              pets={pets}
+              setPets={setPets}
               setShowAddPetModal={setShowAddPetModal}
             />
           }
         />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/login" element={<LoginModal />} />
-        <Route path="/signup" element={<SignupModal />} />
+        <Route 
+          path="/profile" 
+          element={<Profile user={user} setUser={setUser} />} 
+        />
+        <Route 
+          path="/login" 
+          element={<LoginModal setUser={setUser} />} 
+        />
+        <Route 
+          path="/signup" 
+          element={<SignupModal />} 
+        />
       </Routes>
 
       <Footer />
-      
+
       <MessageModal
         showMessageModal={showMessageModal}
         setShowMessageModal={setShowMessageModal}
@@ -110,7 +127,6 @@ const App = () => {
         setShowAddPetModal={setShowAddPetModal}
         newPetForm={newPetForm}
         setNewPetForm={setNewPetForm}
-     
         setPets={setPets}
       />
     </div>

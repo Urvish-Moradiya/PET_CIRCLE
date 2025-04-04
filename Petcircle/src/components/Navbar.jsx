@@ -2,16 +2,11 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import icon from '../assets/image/final.png';
 
-const Navbar = ({ isMenuOpen, setIsMenuOpen }) => {
-  // Check if user is logged in by checking authToken in localStorage
-  const isLoggedIn = !!localStorage.getItem('authToken');
+const Navbar = ({ user, setUser, isMenuOpen, setIsMenuOpen }) => {
   const navigate = useNavigate();
+  const isLoggedIn = !!user;
+  const userRole = user?.role || 'petOwner';
 
-  // Get user data and role
-  const userData = isLoggedIn ? JSON.parse(localStorage.getItem('userData') || '{}') : {};
-  const userRole = userData.role || 'petOwner'; // Default to 'petOwner' if no role
-
-  // Define navigation items for different roles
   const navItems = {
     petOwner: [
       { path: '/', label: 'Home', icon: 'home' },
@@ -29,8 +24,7 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen }) => {
     ]
   };
 
-  // Select navigation items based on role
-  const currentNavItems = userRole === 'petExpert' ? navItems.petExpert : navItems.petOwner;
+  const currentNavItems = userRole === 'pet-expert' ? navItems.petExpert : navItems.petOwner;
 
   const handleLoginClick = () => {
     navigate('/login');
@@ -42,7 +36,7 @@ const Navbar = ({ isMenuOpen, setIsMenuOpen }) => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <img src={icon} className="mr-2 h-10 w-10" alt="PetCircle Logo" />
+            <img src={icon} className="mr-2 h-14 w-14" alt="PetCircle Logo" />
             <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
               PetCircle
             </span>

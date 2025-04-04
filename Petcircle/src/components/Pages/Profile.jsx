@@ -16,7 +16,7 @@ const Profile = () => {
     const fetchUserProfile = async () => {
       const token = localStorage.getItem('authToken');
       const storedUserData = JSON.parse(localStorage.getItem('userData'));
-
+      console
       if (!token || !storedUserData) {
         toast.error('Please login to view your profile', { 
           position: 'top-right', 
@@ -43,6 +43,7 @@ const Profile = () => {
         setUserData(result.data);
         setBio(result.data.bio || '');
         localStorage.setItem('userData', JSON.stringify(result.data));
+        console.log('User data:', result.data);
       } catch (error) {
         console.error('Fetch user error:', error);
         toast.error('Failed to load profile data', { 
@@ -70,6 +71,7 @@ const Profile = () => {
 
   const handleBioUpdate = async () => {
     if (!userData?._id) return;
+
 
     try {
       const token = localStorage.getItem('authToken');

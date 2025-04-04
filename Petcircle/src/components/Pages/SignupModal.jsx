@@ -25,6 +25,7 @@ const SignupModal = () => {
       
       const res = await axios.post("/api/signup", formData); // Base URL is set in App.js
       
+      console.log("userdate",formData)
       if (res.status === 200 || res.status === 201) {
         toast.success('Registration successful! Please login.', {
           position: "top-right",
@@ -63,34 +64,45 @@ const SignupModal = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-2 mt-10">
+    <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col lg:flex-row h-150">
       {/* Left Section - Decorative */}
-      <div className="lg:w-1/2 bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center p-8">
-        <div className="text-white text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-fadeIn">
-            Join PetCircle
-          </h1>
-          <p className="text-lg md:text-xl opacity-90">
-            Create an account and become part of our pet-loving community
+      <div className="lg:w-1/2 bg-gradient-to-br from-purple-700 via-purple-600 to-pink-600 p-8 flex items-center justify-center">
+        <div className="text-white text-center space-y-6 animate-fade-in">
+          <div className="relative">
+            <div className="absolute -top-12 -left-12 w-24 h-24 bg-white/10 rounded-full animate-pulse"></div>
+            <h1 className="text-4xl font-extrabold tracking-tight relative">
+              Join PetCircle
+              <span className="absolute -top-2 -right-6 text-2xl text-pink-300">🐾</span>
+            </h1>
+          </div>
+          <p className="text-lg opacity-90 max-w-xs mx-auto">
+            Become part of our loving pet community today
           </p>
-          <div className="mt-8">
-            <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center">
-              <i className="fas fa-paw text-3xl"></i>
+          <div className="mt-6 flex justify-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center transform hover:scale-110 transition-transform duration-300">
+              <i className="fas fa-paw text-xl"></i>
+            </div>
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center transform hover:scale-110 transition-transform duration-300">
+              <i className="fas fa-heart text-xl"></i>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right Section - Signup Form */}
-      <div className="lg:w-1/2 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-            Sign Up
-          </h2>
-          
-          <form onSubmit={handleSubmit(submitHandler)} className="space-y-6">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
+      <div className="lg:w-1/2 p-8 flex items-center justify-center">
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center">
+            <h2 className="text-3xl mt-5 font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Create Account
+            </h2>
+            <p className="mt-2 text-gray-600">Join our pet-loving community</p>
+          </div>
+
+          <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
                 I am a:
               </label>
               <div className="flex justify-center gap-4">
@@ -100,11 +112,11 @@ const SignupModal = () => {
                     type="button"
                     onClick={() => setSelectedRole(role)}
                     disabled={loading}
-                    className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    className={`flex-1 py-2 px-4 rounded-xl font-medium transition-all duration-300 ${
                       selectedRole === role
-                        ? 'bg-fuchsia-600 text-white'
-                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                    } ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                        ? 'bg-purple-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    } ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:scale-105'}`}
                   >
                     {role === 'pet-owner' ? 'Pet Owner' : 'Pet Expert'}
                   </button>
@@ -112,80 +124,74 @@ const SignupModal = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Full Name
               </label>
-              <div className="relative">
-                <i className="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <div className="relative group">
+                <i className="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"></i>
                 <input
                   type="text"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 transition-all duration-200"
-                  placeholder="Enter your full name"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 transition-all duration-300"
+                  placeholder="John Doe"
                   {...register("fullName", validationMethod.nameValidator)}
                   disabled={loading}
                 />
               </div>
               {errors.fullName && (
-                <span className="text-red-500 text-sm mt-1 block">
-                  {errors.fullName.message}
-                </span>
+                <span className="text-red-500 text-xs">{errors.fullName.message}</span>
               )}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Email Address
               </label>
-              <div className="relative">
-                <i className="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <div className="relative group">
+                <i className="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"></i>
                 <input
                   type="email"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 transition-all duration-200"
-                  placeholder="Enter your email"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 transition-all duration-300"
+                  placeholder="your@email.com"
                   {...register("email", validationMethod.emailValidator)}
                   disabled={loading}
                 />
               </div>
               {errors.email && (
-                <span className="text-red-500 text-sm mt-1 block">
-                  {errors.email.message}
-                </span>
+                <span className="text-red-500 text-xs">{errors.email.message}</span>
               )}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <div className="relative">
-                <i className="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <div className="relative group">
+                <i className="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"></i>
                 <input
                   type="password"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 transition-all duration-200"
-                  placeholder="Create a password"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 transition-all duration-300"
+                  placeholder="••••••••"
                   {...register("password", validationMethod.passwordValidator)}
                   disabled={loading}
                 />
               </div>
               {errors.password && (
-                <span className="text-red-500 text-sm mt-1 block">
-                  {errors.password.message}
-                </span>
+                <span className="text-red-500 text-xs">{errors.password.message}</span>
               )}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 rounded-lg text-white font-semibold bg-gradient-to-r from-fuchsia-600 to-rose-500 hover:from-fuchsia-700 hover:to-rose-600 transition-all duration-200 transform hover:scale-105 ${
-                loading ? 'opacity-75 cursor-not-allowed' : ''
+              className={`w-full py-3 px-4 rounded-xl text-white font-medium bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-200 ${
+                loading ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
               {loading ? (
                 <span className="flex items-center justify-center">
                   <i className="fas fa-spinner fa-spin mr-2"></i>
-                  Signing Up...
+                  Creating Account...
                 </span>
               ) : (
                 'Sign Up'
@@ -193,12 +199,12 @@ const SignupModal = () => {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Already have an account?{' '}
+          <div className="text-center space-y-3">
+            <p className="text-sm text-gray-600">
+              Already a member?{' '}
               <button
                 onClick={() => navigate('/login')}
-                className="text-fuchsia-600 hover:text-fuchsia-700 font-medium transition-colors duration-200"
+                className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200"
                 disabled={loading}
               >
                 Sign In
@@ -207,9 +213,14 @@ const SignupModal = () => {
           </div>
         </div>
       </div>
-
-      <ToastContainer />
     </div>
+    <ToastContainer 
+      position="top-right"
+      autoClose={3000}
+      hideProgressBar
+      theme="colored"
+    />
+  </div>
   );
 };
 

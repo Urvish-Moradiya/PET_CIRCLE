@@ -38,7 +38,7 @@ const loginUser = async (req, res) => {
 
 const signup = async (req, res) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, role } = req.body;
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
@@ -52,7 +52,8 @@ const signup = async (req, res) => {
       fullName,
       email,
       password: hashedPassword,
-      bio: "", // Default empty bio
+      bio: "",
+      role, 
     };
 
     const createdUser = await userModel.create(newUser);
