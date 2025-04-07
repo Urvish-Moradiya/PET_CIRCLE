@@ -18,7 +18,7 @@ const Navbar = ({ user, setUser, isMenuOpen, setIsMenuOpen }) => {
     ],
     petExpert: [
       { path: '/', label: 'Home', icon: 'home' },
-      { path: '/knowledge', label: 'Knowledge', icon: 'book' },
+      { path: '/knowledge2', label: 'Knowledge', icon: 'book' },
       { path: '/communities', label: 'Communities', icon: 'users' },
       { path: '/events', label: 'Events', icon: 'calendar-alt' }
     ]

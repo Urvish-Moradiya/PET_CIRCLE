@@ -16,16 +16,20 @@ app.use(PetRoutes);
 const AdoptionRoutes = require("./src/routes/AdoptionRoutes");
 app.use(AdoptionRoutes);
 
-
 const PetadoptRoutes = require("./src/routes/PetadoptRoutes");
 app.use(PetadoptRoutes);
 
 const CommunityRoutes = require("./src/routes/CommunityRoutes");
 app.use("/", CommunityRoutes);
 
-
 const EventRoutes = require("./src/routes/EventRoutes");
 app.use(EventRoutes);
+
+const ArticleRoutes = require("./src/routes/ArticleRoutes");
+app.use(ArticleRoutes);
+
+const SessionRoutes = require("./src/routes/SessionRoutes");
+app.use(SessionRoutes);
 
 
 mongoose.connect("mongodb://127.0.0.1:27017/Pet_circle")

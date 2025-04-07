@@ -13,6 +13,7 @@ import axios from "axios";
 import Profile from './components/Pages/Profile';
 import LoginModal from './components/Pages/LoginModal';
 import SignupModal from './components/Pages/SignupModal';
+import Knowledge2 from './components/Pages/Knowledge2';
 
 const App = () => {
   axios.defaults.baseURL = "http://localhost:5000";
@@ -89,6 +90,7 @@ const App = () => {
         />
         <Route path="/communities" element={<Communities />} />
         <Route path="/knowledge" element={<Knowledge />} />
+        <Route path="/knowledge2" element={<Knowledge2 />} />
         <Route path="/events" element={<Events />} />
         <Route
           path="/pets"
