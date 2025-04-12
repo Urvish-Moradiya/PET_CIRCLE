@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect
-import { Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './components/AuthContext';
 import Navbar from './components/Navbar';
 import Communities from './components/Pages/Communities';
 import Adoption from './components/Pages/Adoption';
@@ -9,14 +10,14 @@ import PetProfiles from './components/Pages/PetProfiles';
 import Footer from './components/Pages/Footer';
 import { MessageModal, AddPetModal } from './components/Pages/Modals';
 import Home from './components/Pages/Home';
-import axios from "axios";
+import axios from 'axios';
 import Profile from './components/Pages/Profile';
 import LoginModal from './components/Pages/LoginModal';
 import SignupModal from './components/Pages/SignupModal';
 import Knowledge2 from './components/Pages/Knowledge2';
 
 const App = () => {
-  axios.defaults.baseURL = "http://localhost:5000";
+  axios.defaults.baseURL = 'http://localhost:5000';
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -24,9 +25,9 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [petTypeFilter, setPetTypeFilter] = useState('all');
   const [showAddPetModal, setShowAddPetModal] = useState(false);
-  const [pets, setPets] = useState(); // Consider initializing as empty array: []
-  const [adoptionListings] = useState(); // Consider initializing as empty array: []
-  const [user, setUser] = useState(null);
+  const [adoptionListings] = useState([]);
+  const [pets, setPets] = useState([]);
+
   const [newPetForm, setNewPetForm] = useState({
     name: '',
     type: '',
@@ -55,83 +56,50 @@ const App = () => {
     },
   ]);
 
-  // Load user from localStorage on initial render
-  useEffect(() => {
-    const storedUser = localStorage.getItem('userData');
-    const token = localStorage.getItem('authToken');
-    if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
   return (
-    <div className="min-h-screen bg-[#faf9f9] flex flex-col">
-      <Navbar
-        isMenuOpen={isMenuOpen}
-        setIsMenuOpen={setIsMenuOpen}
-        user={user}
-        setUser={setUser}
-      />
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/adoption"
-          element={
-            <Adoption
-              adoptionListings={adoptionListings}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              petTypeFilter={petTypeFilter}
-              setPetTypeFilter={setPetTypeFilter}
-              setShowMessageModal={setShowMessageModal}
+    <AuthProvider>
+        <div className="min-h-screen bg-[#faf9f9] flex flex-col">
+          <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/adoption"
+              element={
+                <Adoption
+                  adoptionListings={adoptionListings}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  petTypeFilter={petTypeFilter}
+                  setPetTypeFilter={setPetTypeFilter}
+                  setShowMessageModal={setShowMessageModal}
+                />
+              }
             />
-          }
-        />
-        <Route path="/communities" element={<Communities />} />
-        <Route path="/knowledge" element={<Knowledge />} />
-        <Route path="/knowledge2" element={<Knowledge2 />} />
-        <Route path="/events" element={<Events />} />
-        <Route
-          path="/pets"
-          element={
-            <PetProfiles
-              pets={pets}
-              setPets={setPets}
-              setShowAddPetModal={setShowAddPetModal}
-            />
-          }
-        />
-        <Route 
-          path="/profile" 
-          element={<Profile user={user} setUser={setUser} />} 
-        />
-        <Route 
-          path="/login" 
-          element={<LoginModal setUser={setUser} />} 
-        />
-        <Route 
-          path="/signup" 
-          element={<SignupModal />} 
-        />
-      </Routes>
-
-      <Footer />
-
-      <MessageModal
-        showMessageModal={showMessageModal}
-        setShowMessageModal={setShowMessageModal}
-        messageInput={messageInput}
-        setMessageInput={setMessageInput}
-      />
-      <AddPetModal
-        showAddPetModal={showAddPetModal}
-        setShowAddPetModal={setShowAddPetModal}
-        newPetForm={newPetForm}
-        setNewPetForm={setNewPetForm}
-        setPets={setPets}
-      />
-    </div>
+            <Route path="/communities" element={<Communities />} />
+            <Route path="/knowledge" element={<Knowledge />} />
+            <Route path="/knowledge2" element={<Knowledge2 />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/pets" element={<PetProfiles pets={pets} setPets={setPets} />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/login" element={<LoginModal />} />
+            <Route path="/signup" element={<SignupModal />} />
+          </Routes>
+          <Footer />
+          <MessageModal
+            showMessageModal={showMessageModal}
+            setShowMessageModal={setShowMessageModal}
+            messageInput={messageInput}
+            setMessageInput={setMessageInput}
+          />
+          <AddPetModal
+            showAddPetModal={showAddPetModal}
+            setShowAddPetModal={setShowAddPetModal}
+            newPetForm={newPetForm}
+            setNewPetForm={setNewPetForm}
+            setPets={setPets}
+          />
+        </div>
+    </AuthProvider>
   );
 };
 

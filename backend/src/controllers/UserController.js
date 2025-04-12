@@ -1,16 +1,15 @@
-const userModel = require("../models/UserModel");
+const UserModel = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 
-const loginUser = async (req, res) => {
+const login = async (req, res) => {
   console.log("Login request received");
   try {
     const { email, password } = req.body;
-    const foundUserFromEmail = await userModel.findOne({ email });
+    const foundUserFromEmail = await UserModel.findOne({ email });
 
     if (foundUserFromEmail) {
       const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
       if (isMatch) {
-        // Use user ID as a simple authToken (not secure for production, but per your request)
         const authToken = foundUserFromEmail._id.toString();
         res.status(200).json({
           message: "Login successful",
@@ -25,21 +24,21 @@ const loginUser = async (req, res) => {
           },
         });
       } else {
-        res.status(404).json({ message: "Invalid credentials" });
+        res.status(401).json({ message: "Invalid credentials" }); // Changed to 401 for unauthorized
       }
     } else {
       res.status(404).json({ message: "Email not found" });
     }
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Error logging in", error });
+    res.status(500).json({ message: "Error logging in", error: error.message });
   }
 };
 
 const signup = async (req, res) => {
   try {
     const { fullName, email, password, role } = req.body;
-    const existingUser = await userModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -53,10 +52,10 @@ const signup = async (req, res) => {
       email,
       password: hashedPassword,
       bio: "",
-      role, 
+      role,
     };
 
-    const createdUser = await userModel.create(newUser);
+    const createdUser = await UserModel.create(newUser);
     const authToken = createdUser._id.toString();
 
     res.status(201).json({
@@ -72,15 +71,15 @@ const signup = async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Signup error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-// New function to update user bio
 const updateUserBio = async (req, res) => {
   try {
     const { userId, bio } = req.body;
-    const updatedUser = await userModel.findByIdAndUpdate(
+    const updatedUser = await UserModel.findByIdAndUpdate(
       userId,
       { bio },
       { new: true }
@@ -100,13 +99,14 @@ const updateUserBio = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: "Error updating bio", error: err });
+    console.error("Update bio error:", err);
+    res.status(500).json({ message: "Error updating bio", error: err.message });
   }
 };
 
 const getUserById = async (req, res) => {
   try {
-    const foundUser = await userModel.findById(req.params.id);
+    const foundUser = await UserModel.findById(req.params.id);
     if (!foundUser) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -116,18 +116,19 @@ const getUserById = async (req, res) => {
         _id: foundUser._id,
         fullName: foundUser.fullName,
         email: foundUser.email,
-        role: foundUser.role || "user", // Default to "user" if not set
+        role: foundUser.role || "user",
         bio: foundUser.bio || "",
       },
     });
   } catch (err) {
+    console.error("Get user error:", err);
     res.status(500).json({ message: "Error fetching user", error: err.message });
   }
 };
 
 module.exports = {
   signup,
-  loginUser,
+  login,
   updateUserBio,
   getUserById,
 };
