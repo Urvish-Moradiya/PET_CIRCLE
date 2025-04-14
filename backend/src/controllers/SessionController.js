@@ -1,4 +1,4 @@
-const Session = require('../models/Session');
+const Session = require('../models/petSession');
 
 exports.createSession = async (req, res) => {
   try {

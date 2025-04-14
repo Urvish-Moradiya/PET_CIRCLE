@@ -19,7 +19,7 @@ const Knowledge = () => {
 
     const fetchSessions = async () => {
       try {
-        const response = await fetch('http://localhost:5000/sessions');
+        const response = await fetch('http://localhost:5000/petsessions');
         if (!response.ok) throw new Error('Failed to fetch sessions');
         const data = await response.json();
         setSessions(data);

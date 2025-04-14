@@ -4,9 +4,11 @@ const Post = require("../models/CommunityPost");
 const communityController = {
   getCommunities: async (req, res) => {
     try {
-      const communities = await Community.find();
+      const communities = await Community.find().populate("joinedUsers", "fullName");
+      console.log("Sending communities:", communities); // Debug log
       res.status(200).json(communities);
     } catch (error) {
+      console.error("Get communities error:", error.message, error.stack); // Detailed log
       res.status(500).json({ error: "Failed to fetch communities" });
     }
   },
@@ -14,12 +16,14 @@ const communityController = {
   getCommunity: async (req, res) => {
     try {
       const { id } = req.params;
-      const community = await Community.findOne({ id });
+      console.log("Fetching community with ID:", id); // Debug log
+      const community = await Community.findOne({ id }).populate("joinedUsers", "fullName");
       if (!community) {
         return res.status(404).json({ error: "Community not found" });
       }
       res.status(200).json(community);
     } catch (error) {
+      console.error("Get community error:", error.message, error.stack); // Detailed log
       res.status(500).json({ error: "Failed to fetch community" });
     }
   },
@@ -47,8 +51,10 @@ const communityController = {
       });
 
       const savedCommunity = await newCommunity.save();
+      console.log("Added community:", savedCommunity); // Debug log
       res.status(201).json(savedCommunity);
     } catch (error) {
+      console.error("Add community error:", error.message, error.stack); // Detailed log
       res.status(500).json({ error: "Failed to add community" });
     }
   },
@@ -56,47 +62,50 @@ const communityController = {
   getCommunityPosts: async (req, res) => {
     try {
       const { id } = req.params;
-      const posts = await Post.find({ communityId: id });
+      console.log("Fetching posts for community ID:", id); // Debug log
+      const posts = await Post.find({ communityId: id }).populate("userId", "fullName");
       res.status(200).json(posts);
     } catch (error) {
+      console.error("Get community posts error:", error.message, error.stack); // Detailed log
       res.status(500).json({ error: "Failed to fetch community posts" });
     }
   },
 
   addPost: async (req, res) => {
     try {
-      const { id } = req.params; // Community ID
-      const { content, author } = req.body;
-  
+      const { id } = req.params;
+      const { content, author, role } = req.body;
+
       if (!content || !author) {
-        return res
-          .status(400)
-          .json({ error: "Content and author are required" });
+        return res.status(400).json({ error: "Content and author are required" });
       }
-  
+
       const community = await Community.findOne({ id });
       if (!community) {
         return res.status(404).json({ error: "Community not found" });
       }
-  
-      // Auto-increment post ID based on existing posts
+
       const lastPost = await Post.findOne().sort({ id: -1 });
       const newPostId = lastPost && lastPost.id ? lastPost.id + 1 : 1;
-  
+
       const newPost = new Post({
         id: newPostId,
         communityId: id,
         content,
         author,
+        userId: null,
+        role: role || "Guest",
       });
-  
+
       const savedPost = await newPost.save();
-  
+
       community.posts += 1;
       await community.save();
-  
+
+      console.log("Added post:", savedPost); // Debug log
       res.status(201).json(savedPost);
     } catch (error) {
+      console.error("Add post error:", error.message, error.stack); // Detailed log
       res.status(500).json({ error: "Failed to add post" });
     }
   },
@@ -104,27 +113,21 @@ const communityController = {
   joinCommunity: async (req, res) => {
     try {
       const { id } = req.params;
-      const { userId } = req.body;
-
-      if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
-      }
+      console.log("Joining community with ID:", id); // Debug log
 
       const community = await Community.findOne({ id });
       if (!community) {
+        console.log("Community not found for ID:", id); // Debug log
         return res.status(404).json({ error: "Community not found" });
       }
 
-      if (community.joinedUsers.includes(userId)) {
-        return res.status(400).json({ error: "User already joined" });
-      }
-
-      community.joinedUsers.push(userId);
-      community.members = community.joinedUsers.length;
+      community.members += 1;
       const updatedCommunity = await community.save();
 
+      console.log("Community updated:", updatedCommunity); // Debug log
       res.status(200).json(updatedCommunity);
     } catch (error) {
+      console.error("Join community error:", error.message, error.stack); // Detailed log
       res.status(500).json({ error: "Failed to join community" });
     }
   },
@@ -132,11 +135,8 @@ const communityController = {
   leaveCommunity: async (req, res) => {
     try {
       const { id } = req.params;
-      const { userId } = req.body;
-
-      if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
-      }
+      const userId = req.user._id;
+      console.log("Leaving community with ID:", id, "for user:", userId); // Debug log
 
       const community = await Community.findOne({ id });
       if (!community) {
@@ -147,14 +147,14 @@ const communityController = {
         return res.status(400).json({ error: "User not a member" });
       }
 
-      community.joinedUsers = community.joinedUsers.filter(
-        (uid) => uid !== userId
-      );
+      community.joinedUsers = community.joinedUsers.filter((uid) => !uid.equals(userId));
       community.members = community.joinedUsers.length;
       const updatedCommunity = await community.save();
 
+      console.log("User left community:", updatedCommunity); // Debug log
       res.status(200).json(updatedCommunity);
     } catch (error) {
+      console.error("Leave community error:", error.message, error.stack); // Detailed log
       res.status(500).json({ error: "Failed to leave community" });
     }
   },

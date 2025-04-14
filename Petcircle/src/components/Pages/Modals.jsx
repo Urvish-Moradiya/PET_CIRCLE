@@ -61,7 +61,7 @@ export const AddPetModal = ({ showAddPetModal, setShowAddPetModal, newPetForm, s
     setPets((prev) => [...prev, newPet]);
     setNewPetForm({
       name: '',
-      type: 'Dog',
+      type: '',
       breed: '',
       birthday: '',
       weight: '',

@@ -1,34 +1,43 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 
 const Communities = () => {
-  const [selectedCommunity, setSelectedCommunity] = useState(null);
-  const [showFeed, setShowFeed] = useState(false);
-  const [joinedCommunities, setJoinedCommunities] = useState([]);
-  const [newPost, setNewPost] = useState("");
+  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
   const [communities, setCommunities] = useState([]);
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
   const [communityPosts, setCommunityPosts] = useState([]);
+  const [newPost, setNewPost] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [newPostId, setNewPostId] = useState(3); // Start after sample data
-
-  const userId = "mockUser123"; // Replace with real auth in production
+  const [showFeed, setShowFeed] = useState(false);
+  const [selectedCommunity, setSelectedCommunity] = useState(null);
 
   useEffect(() => {
     fetchCommunities();
+    // Load joined communities from localStorage
+    const storedJoined = JSON.parse(localStorage.getItem("joinedCommunities") || "[]");
+    setJoinedCommunities(storedJoined);
   }, []);
 
   const fetchCommunities = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/communities");
-      if (!response.ok) throw new Error("Failed to fetch communities");
+      const token = localStorage.getItem("authToken");
+      console.log("fetchCommunities - Token:", token); // Debug
+      const response = await fetch("http://localhost:5000/api/communities", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch communities: ${response.status}`);
+      }
       const data = await response.json();
+      console.log("fetchCommunities - Communities:", data); // Debug
       setCommunities(data);
-      setJoinedCommunities(
-        data.filter((c) => c.joinedUsers.includes(userId)).map((c) => c.id)
-      );
     } catch (err) {
       setError(err.message);
+      console.error("fetchCommunities - Error:", err);
     } finally {
       setLoading(false);
     }
@@ -37,70 +46,94 @@ const Communities = () => {
   const fetchCommunityPosts = async (communityId) => {
     setLoading(true);
     try {
+      console.log("fetchCommunityPosts - Community ID:", communityId); // Debug
       const response = await fetch(
-        `http://localhost:5000/communities/${communityId}/posts`
+        `http://localhost:5000/api/communities/${communityId}/posts`
       );
-      if (!response.ok) throw new Error("Failed to fetch posts");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch posts: ${response.status}`);
+      }
       const data = await response.json();
       setCommunityPosts(data);
     } catch (err) {
       setError(err.message);
+      console.error("fetchCommunityPosts - Error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const toggleJoin = async (communityId) => {
-    if (!joinedCommunities.includes(communityId)) {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/communities/${communityId}/join`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId }),
-          }
+    try {
+      console.log("toggleJoin - Joining community ID:", communityId); // Debug
+      const response = await fetch(
+        `http://localhost:5000/api/communities/${communityId}/join`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const errorData = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(
+          `Failed to join community: ${response.status} ${
+            errorData.error || response.statusText
+          }`
         );
-        if (!response.ok) throw new Error("Failed to join community");
-        const updatedCommunity = await response.json();
-        setJoinedCommunities([...joinedCommunities, communityId]);
-        setCommunities(
-          communities.map((c) => (c.id === communityId ? updatedCommunity : c))
-        );
-      } catch (err) {
-        setError(err.message);
-        return;
       }
+      const updatedCommunity = errorData;
+      const newJoined = [...joinedCommunities, communityId];
+      setJoinedCommunities(newJoined);
+      localStorage.setItem("joinedCommunities", JSON.stringify(newJoined));
+      setCommunities(
+        communities.map((c) => (c.id === communityId ? updatedCommunity : c))
+      );
+      console.log("toggleJoin - Joined community:", updatedCommunity); // Debug
+    } catch (err) {
+      setError(err.message);
+      console.error("toggleJoin - Error:", err);
     }
-    setSelectedCommunity(communityId);
-    setShowFeed(true);
-    fetchCommunityPosts(communityId);
   };
 
   const leaveCommunity = async (communityId) => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/communities/${communityId}/leave`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId }),
-        }
-      );
-      if (!response.ok) throw new Error("Failed to leave community");
-      const updatedCommunity = await response.json();
-      setJoinedCommunities(joinedCommunities.filter((id) => id !== communityId));
-      setCommunities(
-        communities.map((c) => (c.id === communityId ? updatedCommunity : c))
-      );
+      console.log("leaveCommunity - Leaving community ID:", communityId); // Debug
+      const newJoined = joinedCommunities.filter((id) => id !== communityId);
+      setJoinedCommunities(newJoined);
+      localStorage.setItem("joinedCommunities", JSON.stringify(newJoined));
       setShowFeed(false);
       setSelectedCommunity(null);
+      setCommunityPosts([]);
+      // Optional: Update backend if user is logged in
+      if (user) {
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          const response = await fetch(
+            `http://localhost:5000/api/communities/${communityId}/leave`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          const errorData = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            console.error("leaveCommunity - Backend error:", errorData);
+          }
+        }
+      }
     } catch (err) {
       setError(err.message);
+      console.error("leaveCommunity - Error:", err);
     }
   };
 
   const viewCommunity = (communityId) => {
+    console.log("viewCommunity - Viewing community ID:", communityId); // Debug
     setSelectedCommunity(communityId);
     setShowFeed(true);
     fetchCommunityPosts(communityId);
@@ -114,42 +147,70 @@ const Communities = () => {
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
-    if (!newPost.trim() || !selectedCommunity) return;
-  
+    if (!newPost.trim() || !selectedCommunity) {
+      setError("Post content and community selection are required");
+      return;
+    }
+    if (!joinedCommunities.includes(selectedCommunity)) {
+      setError("You must join the community to post");
+      return;
+    }
+
     try {
+      console.log("handlePostSubmit - Posting to community ID:", selectedCommunity); // Debug
       const response = await fetch(
-        `http://localhost:5000/communities/${selectedCommunity}/posts`,
+        `http://localhost:5000/api/communities/${selectedCommunity}/posts`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
-            content: newPost.trim(), // No id sent
-            author: "Current User",
+            content: newPost.trim(),
+            author: user ? user.fullName : "Guest",
+            role: user ? user.role : "Guest",
           }),
         }
       );
+      const errorData = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create post");
+        throw new Error(
+          `Failed to create post: ${response.status} ${
+            errorData.error || response.statusText
+          }`
+        );
       }
-      const newPostObj = await response.json();
+      const newPostObj = errorData;
       setCommunityPosts([newPostObj, ...communityPosts]);
       setNewPost("");
-  
       const communityResponse = await fetch(
-        `http://localhost:5000/communities/${selectedCommunity}`
+        `http://localhost:5000/api/communities/${selectedCommunity}`
       );
+      if (!communityResponse.ok) {
+        throw new Error(`Failed to fetch community: ${communityResponse.status}`);
+      }
       const updatedCommunity = await communityResponse.json();
       setCommunities(
-        communities.map((c) => (c.id === selectedCommunity ? updatedCommunity : c))
+        communities.map((c) =>
+          c.id === selectedCommunity ? updatedCommunity : c
+        )
       );
     } catch (err) {
       setError(err.message);
+      console.error("handlePostSubmit - Error:", err);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-600">
+        Error: {error}
+      </div>
+    );
+  }
 
   if (showFeed && selectedCommunity) {
     const community = communities.find((c) => c.id === selectedCommunity);
@@ -171,78 +232,99 @@ const Communities = () => {
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {community && community.title}
+                  {community?.title || "Community"}
                 </h1>
                 <p className="text-sm text-gray-600">
-                  {community && community.members.toLocaleString()} members •{" "}
-                  {community && community.posts} posts
+                  {community ? `${community.members.toLocaleString()} members • ${community.posts} posts` : "Loading..."}
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => leaveCommunity(selectedCommunity)}
-              className="rounded-md px-4 py-2 bg-red-600 text-white hover:bg-red-700"
-            >
-              <span className="flex items-center">
-                <i className="fas fa-sign-out-alt mr-2"></i>
-                Leave Community
-              </span>
-            </button>
+            {joinedCommunities.includes(selectedCommunity) && (
+              <button
+                onClick={() => leaveCommunity(selectedCommunity)}
+                className="rounded-md px-4 py-2 bg-red-600 text-white hover:bg-red-700"
+              >
+                <span className="flex items-center">
+                  <i className="fas fa-sign-out-alt mr-2"></i>
+                  Leave Community
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
         <main className="max-w-3xl mx-auto px-4 py-8">
-          <form onSubmit={handlePostSubmit} className="mb-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <label
-                htmlFor="post-content"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Share your thoughts about {community && community.title}
-              </label>
-              <textarea
-                id="post-content"
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder={
-                  community
-                    ? `Share your ${community.title.toLowerCase()} related tips...`
-                    : "Share your thoughts..."
-                }
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                required
-              />
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="submit"
-                  className="rounded-md px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
-                  disabled={!newPost.trim()}
+          {joinedCommunities.includes(selectedCommunity) ? (
+            <form onSubmit={handlePostSubmit} className="mb-6">
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <label
+                  htmlFor="post-content"
+                  className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Post Message
-                </button>
+                  Share your thoughts about {community?.title || "this community"}
+                </label>
+                <textarea
+                  id="post-content"
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder={
+                    community
+                      ? `Share your ${community.title.toLowerCase()} related tips...`
+                      : "Share your thoughts..."
+                  }
+                  value={newPost}
+                  onChange={(e) => setNewPost(e.target.value)}
+                  required
+                />
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="submit"
+                    className="rounded-md px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                    disabled={!newPost.trim()}
+                  >
+                    Post Message
+                  </button>
+                </div>
               </div>
+            </form>
+          ) : (
+            <div className="mb-6 bg-white rounded-xl shadow-sm p-6 text-gray-600 border border-yellow-300">
+              <p className="font-semibold">
+                Join {community?.title || "this community"} to post messages!
+              </p>
+              <button
+                onClick={() => toggleJoin(selectedCommunity)}
+                className="mt-2 rounded-md px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700"
+              >
+                Join Now
+              </button>
             </div>
-          </form>
+          )}
 
           <div className="space-y-6">
-            {communityFeed.map((post) => (
-              <div key={post.id} className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center mb-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">
-                      {post.author}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {new Date(post.timestamp).toLocaleString()}
-                    </p>
+            {communityFeed.length > 0 ? (
+              communityFeed.map((post) => (
+                <div key={post.id} className="bg-white rounded-xl shadow-sm p-6">
+                  <div className="flex items-center mb-4">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        {post.author} ({post.role})
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(post.timestamp).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
+                  <p className="text-gray-800 whitespace-pre-wrap">
+                    {post.content}
+                  </p>
                 </div>
-                <p className="text-gray-800 whitespace-pre-wrap">
-                  {post.content}
-                </p>
+              ))
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm p-6 text-gray-600">
+                No posts yet. Be the first to share!
               </div>
-            ))}
+            )}
           </div>
         </main>
       </div>
@@ -254,8 +336,7 @@ const Communities = () => {
       <div className="max-w-7xl mx-auto mt-15 px-4">
         <h1 className="text-3xl font-bold text-gray-900">Pet Communities</h1>
         <p className="mt-2 text-lg text-gray-600">
-          Join communities that match your interests and connect with fellow
-          pet lovers.
+          Join communities that match your interests and connect with fellow pet lovers.
         </p>
       </div>
 
@@ -293,7 +374,7 @@ const Communities = () => {
                   {!joinedCommunities.includes(community.id) ? (
                     <button
                       onClick={() => toggleJoin(community.id)}
-                      className="w-full !rounded-button whitespace-nowrap py-2 px-4 text-center font-medium cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700"
+                      className="w-full rounded-md py-2 px-4 text-center font-medium cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700"
                     >
                       <span className="flex items-center justify-center">
                         <i className="fas fa-plus mr-2"></i>
@@ -303,7 +384,7 @@ const Communities = () => {
                   ) : (
                     <button
                       onClick={() => viewCommunity(community.id)}
-                      className="w-full !rounded-button whitespace-nowrap py-2 px-4 text-center font-medium cursor-pointer bg-green-600 text-white hover:bg-green-700"
+                      className="w-full rounded-md py-2 px-4 text-center font-medium cursor-pointer bg-green-600 text-white hover:bg-green-700"
                     >
                       <span className="flex items-center justify-center">
                         <i className="fas fa-comments mr-2"></i>

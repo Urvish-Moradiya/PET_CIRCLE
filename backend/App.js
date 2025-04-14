@@ -20,7 +20,10 @@ const PetadoptRoutes = require("./src/routes/PetadoptRoutes");
 app.use(PetadoptRoutes);
 
 const CommunityRoutes = require("./src/routes/CommunityRoutes");
-app.use("/", CommunityRoutes);
+app.use("/api",CommunityRoutes);
+
+const authroutes = require("./src/routes/authroutes");
+app.use("/api", authroutes);
 
 const EventRoutes = require("./src/routes/EventRoutes");
 app.use(EventRoutes);
@@ -28,7 +31,7 @@ app.use(EventRoutes);
 const ArticleRoutes = require("./src/routes/ArticleRoutes");
 app.use(ArticleRoutes);
 
-const SessionRoutes = require("./src/routes/SessionRoutes");
+const SessionRoutes = require("./src/routes/PetSessionRoutes");
 app.use(SessionRoutes);
 
 
