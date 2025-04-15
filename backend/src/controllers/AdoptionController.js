@@ -1,9 +1,9 @@
 const Adoption = require('../models/AdoptionModel'); // Adjust path to your model file
 
-// Add new adoption center
+// AdoptionController.js
 exports.addCenter = async (req, res) => {
   try {
-    const { name, image, address, number, time, feature } = req.body;
+    const { name, image, address, number, time, feature, url } = req.body;
 
     // Validate required fields
     if (!name || !address || !number || !time) {
@@ -19,7 +19,8 @@ exports.addCenter = async (req, res) => {
       address,
       number,
       time: new Date(time),
-      feature: feature || []
+      feature: feature || [],
+      url // Add URL to new center
     });
 
     const savedCenter = await newCenter.save();

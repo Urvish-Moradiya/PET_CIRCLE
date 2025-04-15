@@ -25,14 +25,17 @@ app.use("/api",CommunityRoutes);
 const authroutes = require("./src/routes/authroutes");
 app.use("/api", authroutes);
 
-const EventRoutes = require("./src/routes/EventRoutes");
-app.use(EventRoutes);
-
 const ArticleRoutes = require("./src/routes/ArticleRoutes");
 app.use(ArticleRoutes);
 
 const SessionRoutes = require("./src/routes/PetSessionRoutes");
 app.use(SessionRoutes);
+
+const EventRoutes = require("./src/routes/EventRoutes");
+app.use(EventRoutes);
+
+const Eventpetroutes = require('./src/routes/Eventpetroutes');
+app.use(Eventpetroutes);
 
 
 mongoose.connect("mongodb://127.0.0.1:27017/Pet_circle")

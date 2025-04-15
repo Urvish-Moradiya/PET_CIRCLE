@@ -8,7 +8,7 @@ import profile from '../../assets/image/profile.jpg';
 import background from '../../assets/image/background.jpg';
 
 const PetExpertProfile = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth(); // Added logout
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [bio, setBio] = useState('');
@@ -86,14 +86,21 @@ const PetExpertProfile = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    toast.success('Logged out successfully', {
-      position: 'top-right',
-      autoClose: 2000,
-    });
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout(); // Use logout from AuthContext
+      toast.success('Logged out successfully', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to log out', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
+    }
   };
 
   if (authLoading || loading) {

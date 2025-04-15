@@ -1,12 +1,12 @@
+
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 
 const Communities = () => {
-  const { user, setUser } = useAuth();
-  const navigate = useNavigate();
+  const { user, joinedCommunities, setJoinedCommunities } = useAuth(); const navigate = useNavigate();
   const [communities, setCommunities] = useState([]);
-  const [joinedCommunities, setJoinedCommunities] = useState([]);
   const [communityPosts, setCommunityPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
   const [error, setError] = useState("");
@@ -62,40 +62,56 @@ const Communities = () => {
       setLoading(false);
     }
   };
-
   const toggleJoin = async (communityId) => {
+    if (!user) {
+      setError('You must be logged in to join a community.');
+      navigate('/login');
+      return;
+    }
+
     try {
-      console.log("toggleJoin - Joining community ID:", communityId); // Debug
+      console.log('toggleJoin - Joining community ID:', communityId);
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token not found.');
+      }
       const response = await fetch(
         `http://localhost:5000/api/communities/${communityId}/join`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      const errorData = await response.json().catch(() => ({}));
+      const data = await response.json();
       if (!response.ok) {
         throw new Error(
-          `Failed to join community: ${response.status} ${
-            errorData.error || response.statusText
-          }`
+          `Failed to join community: ${response.status} ${data.error || response.statusText}`
         );
       }
-      const updatedCommunity = errorData;
+      const updatedCommunity = data;
       const newJoined = [...joinedCommunities, communityId];
       setJoinedCommunities(newJoined);
-      localStorage.setItem("joinedCommunities", JSON.stringify(newJoined));
+      localStorage.setItem('joinedCommunities', JSON.stringify(newJoined));
       setCommunities(
         communities.map((c) => (c.id === communityId ? updatedCommunity : c))
       );
-      console.log("toggleJoin - Joined community:", updatedCommunity); // Debug
+      console.log('toggleJoin - Joined community:', updatedCommunity);
     } catch (err) {
       setError(err.message);
-      console.error("toggleJoin - Error:", err);
+      console.error('toggleJoin - Error:', err);
     }
   };
+
+  // Reset UI on logout
+  useEffect(() => {
+    if (!user) {
+      setError(null);
+      fetchCommunities(); // Refresh communities to reflect logged-out state
+    }
+  }, [user]);
 
   const leaveCommunity = async (communityId) => {
     try {
@@ -106,7 +122,7 @@ const Communities = () => {
       setShowFeed(false);
       setSelectedCommunity(null);
       setCommunityPosts([]);
-      // Optional: Update backend if user is logged in
+      // Update backend if user is logged in
       if (user) {
         const token = localStorage.getItem("authToken");
         if (token) {
@@ -158,12 +174,14 @@ const Communities = () => {
 
     try {
       console.log("handlePostSubmit - Posting to community ID:", selectedCommunity); // Debug
+      const token = localStorage.getItem("authToken");
       const response = await fetch(
         `http://localhost:5000/api/communities/${selectedCommunity}/posts`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
           },
           body: JSON.stringify({
             content: newPost.trim(),
@@ -175,8 +193,7 @@ const Communities = () => {
       const errorData = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(
-          `Failed to create post: ${response.status} ${
-            errorData.error || response.statusText
+          `Failed to create post: ${response.status} ${errorData.error || response.statusText
           }`
         );
       }
@@ -371,24 +388,38 @@ const Communities = () => {
                   </div>
                 </div>
                 <div className="mt-6">
-                  {!joinedCommunities.includes(community.id) ? (
-                    <button
-                      onClick={() => toggleJoin(community.id)}
-                      className="w-full rounded-md py-2 px-4 text-center font-medium cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700"
-                    >
-                      <span className="flex items-center justify-center">
-                        <i className="fas fa-plus mr-2"></i>
-                        Join Community
-                      </span>
-                    </button>
+                  {user ? ( // Only show buttons if user is logged in
+                    joinedCommunities.includes(community.id) ? (
+                      <div className="flex space-x-4">
+                        <button
+                          onClick={() => viewCommunity(community.id)}
+                          className="flex-1 rounded-md py-2 px-4 text-center font-medium cursor-pointer bg-green-600 text-white hover:bg-green-700"
+                        >
+                          <span className="flex items-center justify-center">
+                            <i className="fas fa-comments mr-2"></i>
+                            View Community Messages
+                          </span>
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => toggleJoin(community.id)}
+                        className="w-full rounded-md py-2 px-4 text-center font-medium cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700"
+                      >
+                        <span className="flex items-center justify-center">
+                          <i className="fas fa-plus mr-2"></i>
+                          Join Community
+                        </span>
+                      </button>
+                    )
                   ) : (
                     <button
-                      onClick={() => viewCommunity(community.id)}
-                      className="w-full rounded-md py-2 px-4 text-center font-medium cursor-pointer bg-green-600 text-white hover:bg-green-700"
+                      onClick={() => navigate('/login')} // Redirect to login for non-authenticated users
+                      className="w-full rounded-md py-2 px-4 text-center font-medium cursor-pointer bg-gray-600 text-white hover:bg-gray-700"
                     >
                       <span className="flex items-center justify-center">
-                        <i className="fas fa-comments mr-2"></i>
-                        View Community Messages
+                        <i className="fas fa-sign-in-alt mr-2"></i>
+                        Login to Join
                       </span>
                     </button>
                   )}

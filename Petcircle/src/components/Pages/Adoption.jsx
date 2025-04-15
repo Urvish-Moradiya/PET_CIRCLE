@@ -13,8 +13,10 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
     image: '',
     address: '',
     age: '',
+    petType: '',
     breed: '',
-    description: ''
+    description: '',
+    ownerContact: '' // Added ownerContact to formData
   });
   const [formError, setFormError] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
@@ -39,7 +41,8 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
           age: pet.age,
           breed: pet.breed,
           description: pet.description,
-          petType: pet.breed.toLowerCase().includes('cat') ? 'cat' : 'dog',
+          petType: pet.petType,
+          ownerContact: pet.ownerContact, // Include ownerContact
           ownerId: 'current-user-id' // Replace with actual owner ID logic if available
         }));
         setAllPets(formattedPets);
@@ -57,9 +60,9 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
 
   // Format time for display
   const formatTime = (time) => {
-    return new Date(time).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(time).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -73,7 +76,8 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
       age: newPet.age,
       breed: newPet.breed,
       description: newPet.description,
-      petType: newPet.breed.toLowerCase().includes('cat') ? 'cat' : 'dog',
+      petType: newPet.petType,
+      ownerContact: newPet.ownerContact, // Include ownerContact
       ownerId: 'current-user-id'
     };
     setPets([formattedPet, ...pets]);
@@ -97,8 +101,10 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
         image: '',
         address: '',
         age: '',
+        petType: '',
         breed: '',
-        description: ''
+        description: '',
+        ownerContact: '' // Reset ownerContact
       });
       setFormError(null);
     } catch (err) {
@@ -114,7 +120,7 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Pet Adoption</h2>
           <div className="flex space-x-4">
-            <button 
+            <button
               onClick={() => setShowForm(true)}
               className="!rounded-button bg-purple-600 text-white px-6 py-2 cursor-pointer hover:bg-purple-700 whitespace-nowrap"
             >
@@ -137,22 +143,22 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
 
         <div className="mb-12">
           <h3 className="text-2xl font-bold mb-6">Featured Adoption Centers</h3>
-          
+
           {loading && (
             <div className="text-center">Loading adoption centers...</div>
           )}
-          
+
           {error && (
             <div className="text-center text-red-500">Error: {error}</div>
           )}
-          
+
           {!loading && !error && (
             <div className="grid md:grid-cols-3 gap-8">
               {centers.map((center) => (
                 <div key={center._id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                  <img 
-                    src={center.image} 
-                    className="w-full h-48 object-cover" 
+                  <img
+                    src={center.image}
+                    className="w-full h-48 object-cover"
                   />
                   <div className="p-6">
                     <h4 className="text-xl font-bold mb-2">{center.name}</h4>
@@ -172,7 +178,7 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
                     </div>
                     <div className="flex items-center space-x-2 mb-4 flex-wrap">
                       {center.feature.map((feat, index) => (
-                        <span 
+                        <span
                           key={index}
                           className="bg-green-100 text-green-600 px-2 py-1 rounded-full text-sm m-1"
                         >
@@ -180,7 +186,11 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
                         </span>
                       ))}
                     </div>
-                    <button className="!rounded-button bg-fuchsia-600 text-white w-full py-2 cursor-pointer hover:bg-fuchsia-700 whitespace-nowrap">
+                    <button
+                      onClick={() => center.url && window.open(center.url, '_blank')} // Redirect to URL
+                      className="!rounded-button bg-fuchsia-600 text-white w-full py-2 cursor-pointer hover:bg-fuchsia-700 whitespace-nowrap disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      disabled={!center.url} // Disable button if no URL
+                    >
                       Visit Center
                     </button>
                   </div>
@@ -193,17 +203,17 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
         {/* All Available Pets Section */}
         <div className="mb-12">
           <h3 className="text-2xl font-bold mb-6">Available Pets for Adoption</h3>
-          
+
           {loading && (
             <div className="text-center">Loading pets...</div>
           )}
-          
+
           {error && (
             <div className="text-center text-red-500">Error: {error}</div>
           )}
-          
+
           {!loading && !error && (
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-3 gap-8">
               {allPets
                 .filter(pet => petTypeFilter === 'all' || pet.petType === petTypeFilter)
                 .map((listing) => (
@@ -220,17 +230,14 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
                         <p className="text-gray-600"><i className="fas fa-map-marker-alt mr-2"></i>{listing.location}</p>
                         <p className="text-gray-600"><i className="fas fa-birthday-cake mr-2"></i>{listing.age} years old</p>
                         <p className="text-gray-600"><i className="fas fa-paw mr-2"></i>{listing.breed}</p>
+                        <p className="text-gray-600">
+                          <i className="fas fa-phone mr-2"></i>
+                          <a href={`tel:${listing.ownerContact}`} className="text-fuchsia-600 hover:underline">
+                            {listing.ownerContact}
+                          </a>
+                        </p>
                       </div>
                       <p className="text-gray-700 mb-6">{listing.description}</p>
-                      <button
-                        onClick={() => {
-                          setSelectedChat(listing.ownerId);
-                          setShowMessageModal(true);
-                        }}
-                        className="!rounded-button bg-fuchsia-600 text-white px-6 py-2 w-full cursor-pointer hover:bg-fuchsia-700 whitespace-nowrap"
-                      >
-                        Contact Owner
-                      </button>
                     </div>
                   </div>
                 ))}
@@ -240,74 +247,102 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-500/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-6">Add Pet for Adoption</h2>
-            
+
             {formError && <div className="text-red-500 mb-4">{formError}</div>}
-            
+
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-700 mb-1">Pet Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">Image URL</label>
+                    <input
+                      type="text"
+                      name="image"
+                      value={formData.image}
+                      onChange={handleChange}
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-700 mb-1">Location *</label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      required
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">Age (years) *</label>
+                    <input
+                      type="number"
+                      name="age"
+                      value={formData.age}
+                      onChange={handleChange}
+                      required
+                      min="0"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-700 mb-1">Pet Type *</label>
+                    <input
+                      type="text"
+                      name="petType"
+                      value={formData.petType}
+                      onChange={handleChange}
+                      required
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">Breed *</label>
+                    <input
+                      type="text"
+                      name="breed"
+                      value={formData.breed}
+                      onChange={handleChange}
+                      required
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-gray-700 mb-1">Pet Name *</label>
+                  <label className="block text-gray-700 mb-1">Owner Contact Number *</label>
                   <input
                     type="text"
-                    name="name"
-                    value={formData.name}
+                    name="ownerContact"
+                    value={formData.ownerContact}
                     onChange={handleChange}
                     required
                     className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                    placeholder="e.g., 1234567890"
                   />
                 </div>
-                
-                <div>
-                  <label className="block text-gray-700 mb-1">Image URL</label>
-                  <input
-                    type="text"
-                    name="image"
-                    value={formData.image}
-                    onChange={handleChange}
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-gray-700 mb-1">Location *</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    required
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-gray-700 mb-1">Age (years) *</label>
-                  <input
-                    type="number"
-                    name="age"
-                    value={formData.age}
-                    onChange={handleChange}
-                    required
-                    min="0"
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-gray-700 mb-1">Breed *</label>
-                  <input
-                    type="text"
-                    name="breed"
-                    value={formData.breed}
-                    onChange={handleChange}
-                    required
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
-                  />
-                </div>
-                
+
                 <div>
                   <label className="block text-gray-700 mb-1">Description *</label>
                   <textarea
@@ -319,7 +354,7 @@ const Adoption = ({ adoptionListings, searchQuery, setSearchQuery, petTypeFilter
                   />
                 </div>
               </div>
-              
+
               <div className="flex justify-end space-x-4 mt-6">
                 <button
                   type="button"

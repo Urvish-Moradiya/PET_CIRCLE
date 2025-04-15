@@ -3,15 +3,17 @@ const Petadopt = require('../models/PetadoptModel');
 // Add a new pet
 exports.addAdoptpet = async (req, res) => {
     try {
-        const { name, image, address, age, breed, description } = req.body;
+        const { name, image, address, age, petType, breed, description, ownerContact } = req.body;
         
         const newPet = new Petadopt({
             name,
             image,
             address,
             age,
+            petType,
             breed,
-            description
+            description,
+            ownerContact // Include the new field
         });
 
         const savedPet = await newPet.save();
@@ -29,7 +31,7 @@ exports.addAdoptpet = async (req, res) => {
     }
 };
 
-
+// Get all pets
 exports.getAllPets = async (req, res) => {
     try {
         const pets = await Petadopt.find();
