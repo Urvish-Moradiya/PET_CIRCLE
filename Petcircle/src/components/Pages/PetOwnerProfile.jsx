@@ -323,7 +323,7 @@ const PetOwnerProfile = () => {
                   <div
                     key={pet._id}
                     className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition duration-200 cursor-pointer"
-                    onClick={() => navigate(`/pet/${pet._id}`)}
+                    onClick={() => navigate(`/pets`)}
                   >
                     <img
                       src={pet.profileImage || 'https://via.placeholder.com/150'}
@@ -354,6 +354,7 @@ const PetOwnerProfile = () => {
                   <div
                     key={community._id}
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200"
+                    onClick={() => navigate(`/communities`)}
                   >
                     <div className="flex items-center space-x-4">
                       <i className="fas fa-users text-fuchsia-500 text-xl"></i>
