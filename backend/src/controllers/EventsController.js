@@ -60,3 +60,28 @@ exports.createEvent = async (req, res) => {
     });
   }
 };
+
+exports.deleteEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const event = await Event.findOne({ id: parseInt(id) });
+    if (!event) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Event not found',
+      });
+    }
+    await Event.deleteOne({ id: parseInt(id) });
+    await Registration.deleteMany({ eventId: parseInt(id) }); // Optional: clean up registrations
+    res.status(200).json({
+      status: 'success',
+      message: 'Event deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to delete event',
+    });
+  }
+};

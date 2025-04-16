@@ -322,7 +322,7 @@ const PetOwnerProfile = () => {
                 memoizedPets.map((pet) => (
                   <div
                     key={pet._id}
-                    className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition duration-200 cursor-pointer"
+                    className="flex items-center space-x-4 p-3 rounded-lg bg-gray-100 hover:bg-gray-50 transition duration-200 cursor-pointer"
                     onClick={() => navigate(`/pets`)}
                   >
                     <img
@@ -335,7 +335,6 @@ const PetOwnerProfile = () => {
                       <h3 className="font-semibold text-gray-900">{pet.name || 'Unnamed Pet'}</h3>
                       <p className="text-sm text-gray-600">{pet.type || 'Unknown Type'}</p>
                       <p className="text-sm text-gray-600">{pet.breed || 'Unknown Breed'}</p>
-                      <p className="text-sm text-gray-500">{calculateAge(pet.birthday)}</p>
                     </div>
                   </div>
                 ))
@@ -363,13 +362,6 @@ const PetOwnerProfile = () => {
                         <p className="text-sm text-gray-600">{community.description || 'No description available'}</p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => leaveCommunity(community._id)}
-                      className="bg-red-100 text-red-600 text-sm font-medium px-3 py-1 rounded-lg hover:bg-red-200 transition duration-300 disabled:bg-gray-300 disabled:text-gray-500"
-                      disabled={leavingCommunity[community._id]}
-                    >
-                      {leavingCommunity[community._id] ? 'Leaving...' : 'Leave'}
-                    </button>
                   </div>
                 ))
               ) : (

@@ -50,3 +50,20 @@ exports.createRegistration = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.getRegistrationsByEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const registrations = await Registration.find({ eventId: parseInt(eventId) });
+    res.status(200).json({
+      status: 'success',
+      data: registrations,
+    });
+  } catch (error) {
+    console.error('Error fetching registrations:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch registrations',
+    });
+  }
+};

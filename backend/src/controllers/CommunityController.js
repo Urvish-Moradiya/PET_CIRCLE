@@ -158,6 +158,22 @@ const communityController = {
       res.status(500).json({ error: "Failed to leave community" });
     }
   },
-};
+
+    deleteCommunity: async (req, res) => {
+      try {
+        const { id } = req.params;
+        const community = await Community.findOne({ id });
+        if (!community) {
+          return res.status(404).json({ error: 'Community not found' });
+        }
+        await Community.deleteOne({ id });
+        await Post.deleteMany({ communityId: id }); // Optional: delete related posts
+        res.status(200).json({ message: 'Community deleted successfully' });
+      } catch (error) {
+        console.error('Delete community error:', error.message, error.stack);
+        res.status(500).json({ error: 'Failed to delete community' });
+      }
+    }
+  };
 
 module.exports = communityController;

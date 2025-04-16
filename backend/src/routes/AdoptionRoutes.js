@@ -5,5 +5,6 @@ const adoptionController = require('../controllers/AdoptionController'); // Adju
 // Routes
 routes.post('/centers', adoptionController.addCenter);
 routes.get('/centers', adoptionController.getCenters);
+routes.delete('/centers/:id', adoptionController.deleteCenter);
 
 module.exports = routes;

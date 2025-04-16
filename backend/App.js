@@ -49,6 +49,8 @@ app.use(EventRoutes);
 const Eventpetroutes = require('./src/routes/Eventpetroutes');
 app.use(Eventpetroutes);
 
+const AdminRoutes = require("./src/routes/admin");
+app.use("/admin", AdminRoutes);
 
 mongoose.connect("mongodb://127.0.0.1:27017/Pet_circle")
   .then(() => {

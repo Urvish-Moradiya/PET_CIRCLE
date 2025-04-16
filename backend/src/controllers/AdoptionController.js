@@ -58,3 +58,22 @@ exports.getCenters = async (req, res) => {
     });
   }
 };
+
+
+exports.deleteCenter = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const center = await Adoption.findById(id);
+    if (!center) {
+      return res.status(404).json({ success: false, message: 'Center not found' });
+    }
+    await Adoption.findByIdAndDelete(id);
+    res.status(200).json({ success: true, message: 'Center deleted successfully' });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting center',
+      error: error.message,
+    });
+  }
+};

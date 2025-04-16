@@ -9,4 +9,5 @@ routes.get("/pets/:petId", authMiddleware, getPetById);
 routes.put("/pets/:id", authMiddleware, upload.single("profileImage"), updatePet);
 routes.delete("/pets/:id", authMiddleware, deletePet);
 
+
 module.exports = routes;

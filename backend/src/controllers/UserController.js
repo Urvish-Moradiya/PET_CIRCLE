@@ -207,10 +207,47 @@ const getUserById = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await UserModel.find().select('_id fullName email role bio createdAt');
+    res.status(200).json({
+      message: 'Users fetched successfully',
+      data: users,
+    });
+  } catch (err) {
+    console.error('Get all users error:', err.stack);
+    res.status(500).json({ message: 'Error fetching users', error: err.message });
+  }
+};
+
+exports.getUserGrowth = async (req, res) => {
+  try {
+    // Mock: Group registrations by month
+    const data = await Registration.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+          count: { $addToSet: '$email' },
+        },
+      },
+      { $sort: { '_id': 1 } },
+      { $limit: 6 },
+    ]);
+    const months = data.map(d => new Date(d._id).toLocaleString('en', { month: 'short' }));
+    const users = data.map(d => d.count.length);
+    res.status(200).json({ months, users });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching user growth', error: error.message });
+  }
+};
+
+
+
 module.exports = {
   signup,
   login,
   logout,
   updateUserBio,
   getUserById,
+  getAllUsers
 };

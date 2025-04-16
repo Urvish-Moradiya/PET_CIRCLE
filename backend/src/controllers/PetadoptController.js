@@ -48,3 +48,21 @@ exports.getAllPets = async (req, res) => {
         });
     }
 };
+
+exports.deleteAdoptpet = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const pet = await Petadopt.findById(id);
+      if (!pet) {
+        return res.status(404).json({ success: false, message: 'Pet not found' });
+      }
+      await Petadopt.findByIdAndDelete(id);
+      res.status(200).json({ success: true, message: 'Pet deleted successfully' });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error deleting pet',
+        error: error.message,
+      });
+    }
+  };
