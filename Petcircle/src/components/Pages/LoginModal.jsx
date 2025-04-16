@@ -212,7 +212,7 @@ const LoginModal = () => {
         position: "top-right",
         autoClose: 3000,
       });
-      navigate("/communities");
+      navigate("/profile");
     } catch (error) {
       console.error("LoginModal - Error:", error);
       const errorMessage =

@@ -1,11 +1,10 @@
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 
 const Communities = () => {
-  const { user, joinedCommunities, setJoinedCommunities } = useAuth(); const navigate = useNavigate();
+  const { user, joinedCommunities, setJoinedCommunities } = useAuth();
+  const navigate = useNavigate();
   const [communities, setCommunities] = useState([]);
   const [communityPosts, setCommunityPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
@@ -62,6 +61,7 @@ const Communities = () => {
       setLoading(false);
     }
   };
+
   const toggleJoin = async (communityId) => {
     if (!user) {
       setError('You must be logged in to join a community.');
@@ -92,7 +92,19 @@ const Communities = () => {
         );
       }
       const updatedCommunity = data;
-      const newJoined = [...joinedCommunities, communityId];
+      // Find the community to get title and description
+      const community = communities.find((c) => c.id === communityId);
+      if (!community) {
+        throw new Error('Community not found.');
+      }
+      const newJoined = [
+        ...joinedCommunities,
+        {
+          id: communityId,
+          title: community.title,
+          description: community.description,
+        },
+      ];
       setJoinedCommunities(newJoined);
       localStorage.setItem('joinedCommunities', JSON.stringify(newJoined));
       setCommunities(
@@ -116,7 +128,7 @@ const Communities = () => {
   const leaveCommunity = async (communityId) => {
     try {
       console.log("leaveCommunity - Leaving community ID:", communityId); // Debug
-      const newJoined = joinedCommunities.filter((id) => id !== communityId);
+      const newJoined = joinedCommunities.filter((community) => community.id !== communityId);
       setJoinedCommunities(newJoined);
       localStorage.setItem("joinedCommunities", JSON.stringify(newJoined));
       setShowFeed(false);
@@ -167,7 +179,7 @@ const Communities = () => {
       setError("Post content and community selection are required");
       return;
     }
-    if (!joinedCommunities.includes(selectedCommunity)) {
+    if (!joinedCommunities.some((community) => community.id === selectedCommunity)) {
       setError("You must join the community to post");
       return;
     }
@@ -193,8 +205,7 @@ const Communities = () => {
       const errorData = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(
-          `Failed to create post: ${response.status} ${errorData.error || response.statusText
-          }`
+          `Failed to create post: ${response.status} ${errorData.error || response.statusText}`
         );
       }
       const newPostObj = errorData;
@@ -256,7 +267,7 @@ const Communities = () => {
                 </p>
               </div>
             </div>
-            {joinedCommunities.includes(selectedCommunity) && (
+            {joinedCommunities.some((c) => c.id === selectedCommunity) && (
               <button
                 onClick={() => leaveCommunity(selectedCommunity)}
                 className="rounded-md px-4 py-2 bg-red-600 text-white hover:bg-red-700"
@@ -271,7 +282,7 @@ const Communities = () => {
         </div>
 
         <main className="max-w-3xl mx-auto px-4 py-8">
-          {joinedCommunities.includes(selectedCommunity) ? (
+          {joinedCommunities.some((c) => c.id === selectedCommunity) ? (
             <form onSubmit={handlePostSubmit} className="mb-6">
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <label
@@ -352,7 +363,8 @@ const Communities = () => {
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto mt-15 px-4">
         <h1 className="text-3xl font-bold text-gray-900">Pet Communities</h1>
-        <p className="mt-2 text-lg text-gray-600">
+        <p className="mt © 2024 xAI - All Rights Reserved
+2 text-lg text-gray-600">
           Join communities that match your interests and connect with fellow pet lovers.
         </p>
       </div>
@@ -388,8 +400,8 @@ const Communities = () => {
                   </div>
                 </div>
                 <div className="mt-6">
-                  {user ? ( // Only show buttons if user is logged in
-                    joinedCommunities.includes(community.id) ? (
+                  {user ? (
+                    joinedCommunities.some((c) => c.id === community.id) ? (
                       <div className="flex space-x-4">
                         <button
                           onClick={() => viewCommunity(community.id)}
@@ -414,7 +426,7 @@ const Communities = () => {
                     )
                   ) : (
                     <button
-                      onClick={() => navigate('/login')} // Redirect to login for non-authenticated users
+                      onClick={() => navigate('/login')}
                       className="w-full rounded-md py-2 px-4 text-center font-medium cursor-pointer bg-gray-600 text-white hover:bg-gray-700"
                     >
                       <span className="flex items-center justify-center">

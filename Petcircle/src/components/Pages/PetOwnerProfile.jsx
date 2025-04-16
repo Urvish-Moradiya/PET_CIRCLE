@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,67 +9,133 @@ import profile from '../../assets/image/profile.jpg';
 import background from '../../assets/image/background.jpg';
 
 const PetOwnerProfile = () => {
-  const { user, loading: authLoading, logout } = useAuth(); // Added logout
+  const { user, loading: authLoading, logout } = useAuth();
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [bio, setBio] = useState('');
   const [isEditingBio, setIsEditingBio] = useState(false);
+  const [pets, setPets] = useState([]);
+  const [joinedCommunities, setJoinedCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [leavingCommunity, setLeavingCommunity] = useState({});
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      const token = localStorage.getItem('authToken');
-      const storedUserData = JSON.parse(localStorage.getItem('userData'));
+  const fetchUserProfileAndData = useCallback(async (signal) => {
+    const token = localStorage.getItem('authToken');
+    const storedUserData = JSON.parse(localStorage.getItem('userData'));
 
-      if (!token || !storedUserData) {
-        toast.error('Please login to view your profile', {
+    if (!token || !storedUserData || !storedUserData._id) {
+      toast.error('Please login to view your profile', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      navigate('/login');
+      return;
+    }
+
+    try {
+      // Fetch user profile
+      console.log('Fetching user profile for ID:', storedUserData._id);
+      const userResponse = await axios.get(`/api/user/${storedUserData._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal,
+      });
+      if (!userResponse.data.data) {
+        throw new Error('Invalid user data response');
+      }
+      setUserData(userResponse.data.data);
+      setBio(userResponse.data.data.bio || '');
+      localStorage.setItem('userData', JSON.stringify(userResponse.data.data));
+
+      // Fetch pets
+      console.log('Fetching pets for user ID:', storedUserData._id);
+      const petUrl = '/pets';
+      console.log('Pet API URL:', petUrl);
+      const petsResponse = await axios.get(petUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal,
+      });
+      console.log('Pets response:', petsResponse.data);
+      const petData = Array.isArray(petsResponse.data.data) ? petsResponse.data.data : [];
+      if (petData.length === 0) {
+        console.log('No pets found for user');
+        toast.info('No pets found for this user', {
           position: 'top-right',
           autoClose: 3000,
         });
-        navigate('/login');
-        return;
       }
+      setPets(petData);
 
+      // Fetch communities
+      let communities = [];
       try {
-        const response = await axios.get(`/api/user/${storedUserData._id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setUserData(response.data.data);
-        setBio(response.data.data.bio || '');
-        localStorage.setItem('userData', JSON.stringify(response.data.data));
-      } catch (error) {
-        console.error('Fetch user error:', error);
-        toast.error('Failed to load profile data', {
-          position: 'top-right',
-          autoClose: 3000,
-        });
-        navigate('/login');
-      } finally {
-        setLoading(false);
+        const rawCommunities = localStorage.getItem('joinedCommunities');
+        console.log('Raw joinedCommunities:', rawCommunities);
+        if (rawCommunities) {
+          communities = JSON.parse(rawCommunities);
+          if (!Array.isArray(communities)) {
+            throw new Error('Invalid communities data format');
+          }
+        }
+      } catch (parseError) {
+        console.error('Error parsing joinedCommunities:', parseError);
+        communities = [];
       }
-    };
-
-    fetchUserProfile();
+      console.log('Parsed joined communities:', communities);
+      setJoinedCommunities(communities);
+    } catch (error) {
+      if (axios.isCancel(error)) return;
+      console.error('Fetch error:', error);
+      let errorMessage = 'Failed to load profile or pet data';
+      if (error.response) {
+        const { status, data } = error.response;
+        errorMessage = `${data.message || error.message} (Status: ${status})`;
+        if (status === 404 && error.config.url.includes('/pets')) {
+          errorMessage = 'No pets found for this user';
+          setPets([]);
+        } else if (status === 403) {
+          errorMessage = 'Unauthorized access. Please login again.';
+          navigate('/login');
+        }
+      } else if (error.request) {
+        errorMessage = 'Network error. Please check your connection.';
+      }
+      toast.error(errorMessage, {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      setPets([]);
+      let communities = [];
+      try {
+        const rawCommunities = localStorage.getItem('joinedCommunities');
+        console.log('Raw joinedCommunities on error:', rawCommunities);
+        if (rawCommunities) {
+          communities = JSON.parse(rawCommunities) || [];
+        }
+      } catch (parseError) {
+        console.error('Error parsing joinedCommunities on error:', parseError);
+      }
+      setJoinedCommunities(communities);
+    } finally {
+      setLoading(false);
+    }
   }, [navigate]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchUserProfileAndData(controller.signal);
+    return () => controller.abort();
+  }, [fetchUserProfileAndData]);
+
   const handleBioUpdate = async () => {
-    if (!userData?._id) return;
+    if (!userData?._id || !bio.trim()) return;
 
     try {
       const token = localStorage.getItem('authToken');
       const response = await axios.post(
         '/api/update-bio',
         { userId: userData._id, bio },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setUserData(response.data.data);
       setBio(response.data.data.bio || '');
       localStorage.setItem('userData', JSON.stringify(response.data.data));
@@ -88,7 +155,8 @@ const PetOwnerProfile = () => {
 
   const handleLogout = async () => {
     try {
-      await logout(); // Use logout from AuthContext
+      await logout();
+      localStorage.removeItem('joinedCommunities');
       toast.success('Logged out successfully', {
         position: 'top-right',
         autoClose: 2000,
@@ -103,16 +171,65 @@ const PetOwnerProfile = () => {
     }
   };
 
+  const leaveCommunity = (communityId) => {
+    if (leavingCommunity[communityId]) return;
+
+    console.log('Leaving community ID:', communityId);
+    setLeavingCommunity((prev) => ({ ...prev, [communityId]: true }));
+    try {
+      const updatedCommunities = joinedCommunities.filter((community) => community._id !== communityId);
+      setJoinedCommunities(updatedCommunities);
+      localStorage.setItem('joinedCommunities', JSON.stringify(updatedCommunities));
+      toast.success('Left community successfully', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
+    } catch (error) {
+      console.error('Leave community error:', error);
+      toast.error('Failed to leave community', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+    } finally {
+      setLeavingCommunity((prev) => ({ ...prev, [communityId]: false }));
+    }
+  };
+
+  const calculateAge = useCallback((birthday) => {
+    if (!birthday) return 'Age Unknown';
+    const birthDate = new Date(birthday);
+    if (isNaN(birthDate)) return 'Age Unknown';
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age >= 0 ? `${age} ${age === 1 ? 'year' : 'years'}` : 'Less than a year';
+  }, []);
+
+  const memoizedPets = useMemo(() => pets, [pets]);
+  const memoizedCommunities = useMemo(() => joinedCommunities, [joinedCommunities]);
+
   if (authLoading || loading) {
-    return <div className="flex justify-center items-center h-screen text-gray-600">Loading...</div>;
+    return (
+      <div className="min-h-screen pt-20 px-4 max-w-7xl mx-auto bg-[#faf9f9]">
+        <div className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
+          <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+          <div className="pt-16 px-8 pb-8">
+            <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!user || !userData) {
     navigate('/login');
     return null;
   }
-
-  console.log(userData);
 
   return (
     <div className="min-h-screen pt-20 px-4 max-w-7xl mx-auto bg-[#faf9f9]">
@@ -145,7 +262,7 @@ const PetOwnerProfile = () => {
                     <textarea
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-fuchsia-500 text-gray-700 resize-none"
+                      className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 text-gray-700 resize-none"
                       rows="3"
                       maxLength={200}
                       placeholder="Write your bio here (max 200 characters)..."
@@ -197,43 +314,73 @@ const PetOwnerProfile = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mt-8">
         <div className="md:col-span-4 space-y-6">
+          {/* Pet Profiles Section */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">My Pets</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">My Pets</h2>
             <div className="space-y-4">
-              {[
-                {
-                  name: 'Luna',
-                  type: 'Golden Retriever',
-                  age: '2 years',
-                  image: 'https://public.readdy.ai/ai/img_res/baaf805e37d7c7b142202322d37c8236.jpg',
-                },
-                {
-                  name: 'Oliver',
-                  type: 'British Shorthair',
-                  age: '3 years',
-                  image: 'https://public.readdy.ai/ai/img_res/43045d2d044b0d78be81ca6fae84a4c5.jpg',
-                },
-              ].map((pet) => (
-                <div key={pet.name} className="flex items-center space-x-4">
-                  <img
-                    src={pet.image}
-                    alt={pet.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                    onError={(e) => (e.target.src = '/fallback-pet.jpg')}
-                  />
-                  <div>
-                    <h3 className="font-semibold">{pet.name}</h3>
-                    <p className="text-sm text-gray-600">{pet.type}</p>
-                    <p className="text-sm text-gray-500">{pet.age}</p>
+              {memoizedPets.length > 0 ? (
+                memoizedPets.map((pet) => (
+                  <div
+                    key={pet._id}
+                    className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition duration-200 cursor-pointer"
+                    onClick={() => navigate(`/pet/${pet._id}`)}
+                  >
+                    <img
+                      src={pet.profileImage || 'https://via.placeholder.com/150'}
+                      alt={pet.name || 'Pet'}
+                      className="w-16 h-16 rounded-full object-cover shadow-sm"
+                      onError={(e) => (e.target.src = '/fallback-pet.jpg')}
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">{pet.name || 'Unnamed Pet'}</h3>
+                      <p className="text-sm text-gray-600">{pet.type || 'Unknown Type'}</p>
+                      <p className="text-sm text-gray-600">{pet.breed || 'Unknown Breed'}</p>
+                      <p className="text-sm text-gray-500">{calculateAge(pet.birthday)}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-600 text-sm">No pets added yet.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Joined Communities Section */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Joined Communities</h2>
+            <div className="space-y-4">
+              {memoizedCommunities.length > 0 ? (
+                memoizedCommunities.map((community) => (
+                  <div
+                    key={community._id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <i className="fas fa-users text-fuchsia-500 text-xl"></i>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{community.title || 'Unnamed Community'}</h3>
+                        <p className="text-sm text-gray-600">{community.description || 'No description available'}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => leaveCommunity(community._id)}
+                      className="bg-red-100 text-red-600 text-sm font-medium px-3 py-1 rounded-lg hover:bg-red-200 transition duration-300 disabled:bg-gray-300 disabled:text-gray-500"
+                      disabled={leavingCommunity[community._id]}
+                    >
+                      {leavingCommunity[community._id] ? 'Leaving...' : 'Leave'}
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-600 text-sm">No communities joined yet.</p>
+              )}
             </div>
           </div>
         </div>
+
         <div className="md:col-span-8">
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-4">My Posts</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">My Posts</h2>
             <div className="space-y-6 max-h-[800px] overflow-y-auto pr-4">
               {[
                 {
@@ -251,25 +398,25 @@ const PetOwnerProfile = () => {
                   time: '5 days ago',
                 },
               ].map((post, index) => (
-                <div key={index} className="border-b pb-6 last:border-b-0 last:pb-0">
+                <div key={`post-${index}`} className="border-b pb-6 last:border-b-0 last:pb-0">
                   <img
                     src={post.image}
                     alt="Post"
-                    className="w-full h-64 object-cover rounded-lg mb-4"
+                    className="w-full h-64 object-cover rounded-lg mb-4 shadow-sm"
                     onError={(e) => (e.target.src = '/fallback-post.jpg')}
                   />
                   <p className="text-gray-800 mb-3">{post.content}</p>
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <div className="flex items-center space-x-4">
-                      <button className="flex items-center space-x-1 hover:text-fuchsia-600">
+                      <button className="flex items-center space-x-1 hover:text-fuchsia-600 transition duration-200">
                         <i className="fas fa-heart"></i>
                         <span>{post.likes}</span>
                       </button>
-                      <button className="flex items-center space-x-1 hover:text-fuchsia-600">
+                      <button className="flex items-center space-x-1 hover:text-fuchsia-600 transition duration-200">
                         <i className="fas fa-comment"></i>
                         <span>{post.comments}</span>
                       </button>
-                      <button className="hover:text-fuchsia-600">
+                      <button className="hover:text-fuchsia-600 transition duration-200">
                         <i className="fas fa-share"></i>
                       </button>
                     </div>

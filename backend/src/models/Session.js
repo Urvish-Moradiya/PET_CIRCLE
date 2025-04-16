@@ -3,8 +3,8 @@ const Schema = mongoose.Schema;
 
 // models/Session.js
 const SessionSchema = new Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   token: { type: String, required: true, unique: true },
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  expiresAt: { type: Date },
-});
+  expiresAt: { type: Date, required: true },
+}, { timestamps: true });
 module.exports = mongoose.model("Session", SessionSchema);
