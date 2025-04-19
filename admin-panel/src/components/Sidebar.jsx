@@ -70,9 +70,9 @@ const Sidebar = ({ activeTab, onItemClick }) => {
   return (
     <div className="w-64 bg-indigo-800 text-white shadow-lg h-screen flex flex-col">
       <div className="p-6">
-        <h1 className="text-2xl font-bold flex items-center">
+        <h1 className="text-3xl font-bold flex items-center">
           <i className="fas fa-paw mr-2"></i>
-          Pet Community
+          Pet Circle
         </h1>
         <p className="text-indigo-200 text-sm mt-1">Admin Panel</p>
       </div>

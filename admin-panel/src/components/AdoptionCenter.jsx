@@ -85,8 +85,6 @@ const Adoption = () => {
       Object.entries(newCenter).forEach(([key, value]) => {
         if (key === 'feature') {
           formData.append(key, value.split(',').map(f => f.trim()));
-        } else if (key === 'image' && value) {
-          formData.append(key, value);
         } else {
           formData.append(key, value);
         }
@@ -111,7 +109,6 @@ const Adoption = () => {
         time: '',
         feature: '',
         url: '',
-        image: null,
       });
     } catch (err) {
       alert('Error adding center: ' + err.message);
@@ -541,15 +538,7 @@ const Adoption = () => {
                   placeholder="Enter website URL"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => setNewCenter({ ...newCenter, image: e.target.files[0] })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                />
-              </div>
+             
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"

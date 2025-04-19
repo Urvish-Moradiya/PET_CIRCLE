@@ -9,6 +9,7 @@ const SignupModal = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState('pet-owner');
+  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
   const navigate = useNavigate();
 
   const roles = ['pet-owner', 'pet-expert'];
@@ -16,7 +17,6 @@ const SignupModal = () => {
   const submitHandler = async (data) => {
     setLoading(true);
     try {
-      // Normalize role for backend
       const normalizedRole = selectedRole === 'pet-owner' ? 'PetOwner' : 'PetExpert';
 
       const formData = {
@@ -33,7 +33,7 @@ const SignupModal = () => {
           position: 'top-right',
           autoClose: 2000,
           hideProgressBar: true,
-          onClose: () => navigate('/login'), // Redirects to login page after successful signup
+          onClose: () => navigate('/login'),
         });
       } else {
         throw new Error('Registration failed');
@@ -63,6 +63,11 @@ const SignupModal = () => {
       required: { value: true, message: 'Password is required' },
       minLength: { value: 8, message: 'Password must be at least 8 characters long' },
     },
+  };
+
+  // Function to toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -171,12 +176,20 @@ const SignupModal = () => {
                 <div className="relative group">
                   <i className="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors"></i>
                   <input
-                    type="password"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 transition-all duration-300"
+                    type={showPassword ? "text" : "password"} // Toggle input type
+                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 transition-all duration-300"
                     placeholder="••••••••"
                     {...register('password', validationMethod.passwordValidator)}
                     disabled={loading}
                   />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-600 focus:outline-none transition-colors"
+                    disabled={loading}
+                  >
+                    <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                  </button>
                 </div>
                 {errors.password && (
                   <span className="text-red-500 text-xs">{errors.password.message}</span>

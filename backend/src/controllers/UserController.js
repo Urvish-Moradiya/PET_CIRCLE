@@ -241,7 +241,39 @@ exports.getUserGrowth = async (req, res) => {
   }
 };
 
+const deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const deletedUser = await UserModel.findByIdAndDelete(userId);
+    if (!deletedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    await Session.deleteMany({ userId });
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting user', error: err.message });
+  }
+};
 
+const updateUser = async (req, res) => {
+  try {
+    const { userId, role, status } = req.body;
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { role, status },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({
+      message: 'User updated successfully',
+      data: updatedUser,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating user', error: err.message });
+  }
+};
 
 module.exports = {
   signup,
@@ -249,5 +281,7 @@ module.exports = {
   logout,
   updateUserBio,
   getUserById,
-  getAllUsers
+  getAllUsers,
+  deleteUser,
+  updateUser,
 };

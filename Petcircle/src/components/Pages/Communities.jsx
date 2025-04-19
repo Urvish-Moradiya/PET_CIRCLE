@@ -248,7 +248,7 @@ const Communities = () => {
 
     return (
       <div className="min-h-screen">
-        <div className="max-w-7xl mx-auto mt-10 px-4 py-4">
+        <div className="max-w-7xl mx-auto mt-15 px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button
