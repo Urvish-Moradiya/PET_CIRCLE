@@ -72,7 +72,23 @@
 
 ## 📷 Screenshots
 
-> _Add UI screenshots here (e.g., pet profile page, community feed, expert dashboard, adoption center)_
+### 🔹 Home
+![Home Screenshot](assets/home.png)
+
+### 🔹 Adoption
+![Adoption Screenshot](assets/adoption.png)
+
+### 🔹 Communities
+![communities Screenshot](assets/communities.png)
+
+### 🔹 Knowledge Center
+![knowledge Screenshot](assets/knowledge.png)
+
+### 🔹 Events
+![events Screenshot](assets/events.png)
+
+### 🔹 PetProfile
+![petprofile Screenshot](assets/petprofile.png)
 
 ---
 
